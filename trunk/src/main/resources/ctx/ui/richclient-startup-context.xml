@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+<!-- $Id: richclient-startup-context.xml,v 1.2 2004/10/01 14:50:11 kdonald Exp $ -->
+<beans>
+	<bean id="splashScreen"
+		class="org.springframework.richclient.application.splash.ProgressSplashScreen"
+		singleton="false">
+		<property name="imageResourcePath">
+			<value>/images/splashscreen.gif</value>
+		</property>
+	</bean>
+</beans>
