@@ -2,4 +2,4 @@
 
 <h2>WebScarab is a product of the Open Web Application Security Project (OWASP)</h2>
 
-<p>WebScarab was written by Rogan Dawes (rogan AT dawes.za.net)</p>
+<p>WebScarab is run by Daniel Brzozowski (daniel AT brzozowski.biz)</p>
