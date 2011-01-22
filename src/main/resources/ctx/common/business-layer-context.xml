@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+
+	<!--bean id="conversationServiceTarget"
+		class="org.owasp.webscarab.services.ConversationService" lazy-init="true">
+		<property name="session">
+			<value>0</value>
+		</property>
+		<property name="conversationDao">
+			<ref bean="conversationDao" />
+		</property>
+		<property name="annotationDao">
+			<ref bean="annotationDao" />
+		</property>
+		<property name="eventService">
+			<ref bean="eventService" />
+		</property>
+	</bean-->
+
+	<!--bean id="conversationService"
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+		lazy-init="true">
+		<property name="transactionManager">
+			<ref bean="transactionManager" />
+		</property>
+		<property name="target">
+			<ref local="conversationServiceTarget" />
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="addConversation">
+					PROPAGATION_REQUIRED, ISOLATION_READ_UNCOMMITTED
+				</prop>
+				<prop key="get*">
+					PROPAGATION_REQUIRED, ISOLATION_READ_UNCOMMITTED
+				</prop>
+			</props>
+		</property>
+	</bean -->
+
+	<bean name="conversationService"
+		class="org.owasp.webscarab.services.TransactionManagedConversationService"
+		lazy-init="true">
+		<property name="transactionManager">
+			<ref bean="transactionManager" />
+		</property>
+		<property name="conversationDao">
+			<ref bean="conversationDao" />
+		</property>
+		<property name="annotationDao">
+			<ref bean="annotationDao" />
+		</property>
+		<property name="eventService">
+			<ref bean="eventService" />
+		</property>
+	</bean>
+
+</beans>

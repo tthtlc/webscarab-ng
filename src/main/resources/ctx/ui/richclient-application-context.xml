@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+<!-- $Id: richclient-application-context.xml,v 1.30 2005/10/25 13:58:57 lstreepy Exp $ -->
+<beans>
+
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>org.springframework.richclient.application.messages</value>
+				<value>org.owasp.webscarab.ui.rcp.messages</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="imageResourcesFactory"
+		class="org.springframework.context.support.ResourceMapFactoryBean">
+		<property name="locations">
+			<list>
+				<value>classpath:org/springframework/richclient/image/images.properties</value>
+				<value>classpath:org/owasp/webscarab/ui/rcp/images.properties</value>
+			</list>
+		</property>
+		<property name="resourceBasePath">
+			<value>images/</value>
+		</property>
+	</bean>
+
+	<bean id="imageSource"
+		class="org.springframework.richclient.image.DefaultImageSource">
+		<constructor-arg index="0">
+			<value>true</value>
+		</constructor-arg>
+		<constructor-arg index="1">
+			<ref bean="imageResourcesFactory" />
+		</constructor-arg>
+		<property name="brokenImageIndicator">
+			<value>org/springframework/richclient/images/alert/error_obj.gif</value>
+		</property>
+	</bean>
+
+	<bean id="iconSource"
+		class="org.springframework.richclient.image.DefaultIconSource"/>
+
+	<bean id="applicationObjectConfigurer" depends-on="serviceLocator"
+        class="org.springframework.richclient.application.config.DefaultApplicationObjectConfigurer">
+    </bean>
+
+   	<bean id="serviceLocator" class="org.springframework.richclient.application.ApplicationServicesLocator">
+		<property name="applicationServices" ref="applicationServices"/>
+	</bean>
+
+	<bean id="commandConfigurer" class="org.springframework.richclient.command.config.DefaultCommandConfigurer"/>
+
+	<bean id="applicationServices" singleton="true"
+		class="org.springframework.richclient.application.support.DefaultApplicationServices">
+		<property name="commandConfigurer" ref="commandConfigurer"/>
+		<property name="imageSource" ref="imageSource"/>
+		<property name="rulesSource" ref="rulesSource"/>
+		<property name="formComponentInterceptorFactory" ref="formComponentInterceptorFactory"/>
+		<property name="applicationObjectConfigurerId"><idref bean="applicationObjectConfigurer"/></property>
+		<property name="componentFactory" ref="componentFactory"/>
+        <property name="applicationPageFactoryId"><idref bean="applicationPageFactory" /></property>
+        <property name="conversionServiceId"><idref bean="conversionService"/></property>
+	</bean>
+
+	<bean id="applicationPageFactory" depends-on="serviceLocator"
+		class="org.springframework.richclient.application.docking.vldocking.VLDockingApplicationPageFactory" lazy-init="false">
+	</bean>
+
+	<bean id="conversionService"
+		class="org.owasp.webscarab.util.ConversionServiceFactoryBean" singleton="true"/>
+
+	<bean id="application"
+		class="org.springframework.richclient.application.Application">
+		<constructor-arg index="0">
+			<ref bean="applicationDescriptor" />
+		</constructor-arg>
+		<constructor-arg index="1">
+			<ref bean="lifecycleAdvisor" />
+		</constructor-arg>
+	</bean>
+
+	<bean id="lifecycleAdvisor"
+		class="org.owasp.webscarab.ui.rcp.WebScarabLifecycleAdvisor">
+		<property name="windowCommandBarDefinitions">
+			<value>ctx/ui/commands-context.xml</value>
+		</property>
+		<property name="startingPageId">
+			<value>proxyPage</value>
+		</property>
+		<property name="registerableExceptionHandler" ref="exceptionHandler"/>
+		<property name="windowCommandManagerBeanName" value="windowCommandManager" />
+		<property name="menubarBeanName" value="menuBar" />
+		<property name="toolbarBeanName" value="toolBar" />
+		<property name="dataSourceFactory" ref="&amp;dataSource"/>
+		<property name="eventService" ref="eventService"/>
+	</bean>
+
+	<bean id="exceptionHandler" class="org.springframework.richclient.exceptionhandling.MessagesDialogExceptionHandler">
+		<property name="logLevel" value="ERROR"/>
+		<property name="shutdownPolicy" value="NONE"/>
+	</bean>
+
+ 	<bean id="proxyPage"
+		class="org.springframework.richclient.application.docking.vldocking.VLDockingPageDescriptor">
+		<property name="viewDescriptors">
+			<list>
+				<value>siteMapView</value>
+				<value>conversationListView</value>
+				<value>conversationView</value>
+                                <value>spiderView</value>
+			</list>
+		</property>
+		<property name="initialLayout">
+			<bean class="org.springframework.core.io.ClassPathResource">
+				<constructor-arg type="java.lang.String">
+					<value>/layouts/proxyPage.xml</value>
+				</constructor-arg>
+			</bean>
+		</property>
+		<property name="layoutManager">
+			<bean class="org.owasp.webscarab.util.swing.WSLayoutManager"/>
+		</property>
+	</bean>
+
+	<bean id="eventService"
+		class="org.bushe.swing.event.ThreadSafeEventService">
+		<constructor-arg index="0">
+			<null />
+		</constructor-arg>
+	</bean>
+
+        <bean id="spiderPopup"
+		class="org.owasp.webscarab.plugins.spider.swing.SpiderContextMenu">
+	</bean>
+
+	<bean id="applicationDescriptor"
+		class="org.owasp.webscarab.util.ManifestApplicationDescriptor">
+		<constructor-arg index="0">
+			<value>org.owasp.webscarab.WebScarab</value>
+		</constructor-arg>
+		<property name="title">
+			<value>WebScarab - the Next Generation</value>
+		</property>
+	</bean>
+
+	<bean id="applicationEventMulticaster"
+		class="org.springframework.context.event.SimpleApplicationEventMulticaster" />
+
+	<bean id="componentFactory"
+		class="org.springframework.richclient.factory.DefaultComponentFactory">
+		<property name="messageSource">
+			<ref bean="messageSource" />
+		</property>
+		<property name="tableFactory">
+			<bean class="org.owasp.webscarab.util.swing.SwingxTableFactory"/>
+		</property>
+	</bean>
+
+	<bean id="binderSelectionStrategy"
+		class="org.springframework.richclient.form.binding.swing.SwingBinderSelectionStrategy">
+		<property name="bindersForPropertyTypes">
+			<map>
+				<!--
+					<entry>
+					<key>
+					<value type="java.lang.Class">java.lang.Integer</value>
+					</key>
+					<bean
+					class="org.springframework.richclient.form.binding.swing.NumberBinding">
+						<property name=""></property>
+					</bean>
+					</entry>
+					<entry>
+					<key>
+					<value type="java.lang.Class">
+					org.petclinic.PetType</value>
+					</key>
+					<bean
+					class="org.petclinic.ui.binder.PetTypeBinder">
+					<property name="clinic">
+					<ref bean="clinic"/>
+					</property>
+					</bean>
+					</entry>
+				-->
+			</map>
+		</property>
+	</bean>
+
+	<bean id="lookAndFeelConfigurer"
+		class="org.springframework.richclient.application.config.JGoodiesLooksConfigurer">
+		<property name="popupDropShadowEnabled" value="false" />
+		<property name="theme">
+			<bean
+				class="com.jgoodies.looks.plastic.theme.ExperienceBlue" />
+		</property>
+	</bean>
+
+	<bean id="formComponentInterceptorFactory"
+		class="org.springframework.richclient.form.builder.support.ChainedInterceptorFactory">
+		<property name="interceptorFactories">
+			<list>
+				<bean
+					class="org.springframework.richclient.form.builder.support.ColorValidationInterceptorFactory">
+					<property name="errorColor">
+						<value>255,245,245</value>
+					</property>
+				</bean>
+				<bean
+					class="org.springframework.richclient.form.builder.support.OverlayValidationInterceptorFactory" />
+				<bean
+					class="org.springframework.richclient.text.TextComponentPopupInterceptorFactory" />
+				<bean
+					class="org.springframework.richclient.text.TextCaretFormComponentInterceptorFactory" />
+				<bean
+					class="org.springframework.richclient.text.SelectAllFormComponentInterceptorFactory" />
+				<bean
+					class="org.springframework.richclient.list.ComboBoxAutoCompletionInterceptorFactory"><!--
+					<property name="messageSource">
+						<ref bean="messageSource" />
+					</property>
+				--></bean>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="rulesSource"
+		class="org.owasp.webscarab.domain.WebScarabValidationRulesSource"/>
+
+	<bean id="conversationList"
+		class="org.owasp.webscarab.ui.rcp.ConversationListFactory" singleton="true"
+		lazy-init="false">
+		<property name="eventService">
+			<ref bean="eventService" />
+		</property>
+	</bean>
+
+	<bean id="conversationTableFactory"
+		class="org.owasp.webscarab.ui.rcp.ConversationTableFactory" singleton="true"/>
+
+	<bean id="conversationView"
+		class="org.springframework.richclient.application.docking.vldocking.VLDockingViewDescriptor">
+		<property name="viewClass"><value>org.owasp.webscarab.ui.rcp.ConversationView</value></property>
+		<property name="viewProperties">
+			<map>
+				<entry key="eventService">
+					<ref bean="eventService" />
+				</entry>
+			</map>
+		</property>
+		<property name="autoHideEnabled"><value>true</value></property>
+		<property name="closeEnabled"><value>true</value></property>
+		<property name="floatEnabled"><value>true</value></property>
+		<property name="maximizeEnabled"><value>true</value></property>
+	</bean>
+
+	<bean id="conversationListView"
+		class="org.springframework.richclient.application.docking.vldocking.VLDockingViewDescriptor">
+		<property name="viewClass"><value>org.owasp.webscarab.ui.rcp.ConversationListView</value></property>
+		<property name="viewProperties">
+			<map>
+				<entry key="conversationList">
+					<ref bean="conversationList" />
+				</entry>
+				<entry key="eventService">
+					<ref bean="eventService" />
+				</entry>
+				<entry key="conversationTableFactory">
+					<ref bean="conversationTableFactory" />
+				</entry>
+			</map>
+		</property>
+		<property name="autoHideEnabled"><value>true</value></property>
+		<property name="closeEnabled"><value>true</value></property>
+		<property name="floatEnabled"><value>true</value></property>
+		<property name="maximizeEnabled"><value>true</value></property>
+	</bean>
+
+	<bean id="siteMapView"
+		class="org.springframework.richclient.application.docking.vldocking.VLDockingViewDescriptor">
+		<property name="viewClass"><value>org.owasp.webscarab.ui.rcp.SiteMapView</value></property>
+		<property name="viewProperties">
+			<map>
+				<entry key="conversationList">
+					<ref bean="conversationList" />
+				</entry>
+				<entry key="eventService">
+					<ref bean="eventService" />
+				</entry>
+                                <entry key="spiderPopup">
+					<ref bean="spiderPopup" />
+				</entry>
+			</map>
+		</property>
+		<property name="autoHideEnabled"><value>true</value></property>
+		<property name="closeEnabled"><value>true</value></property>
+		<property name="floatEnabled"><value>true</value></property>
+		<property name="maximizeEnabled"><value>true</value></property>
+	</bean>
+
+	<bean id="manualRequestView"
+		class="org.springframework.richclient.application.docking.vldocking.VLDockingViewDescriptor">
+		<property name="viewClass"><value>org.owasp.webscarab.ui.rcp.ManualRequestView</value></property>
+		<property name="viewProperties">
+			<map>
+				<entry key="eventService">
+					<ref bean="eventService" />
+				</entry>
+				<entry key="httpService">
+					<ref bean="httpService" />
+				</entry>
+			</map>
+		</property>
+		<property name="autoHideEnabled"><value>true</value></property>
+		<property name="closeEnabled"><value>true</value></property>
+		<property name="floatEnabled"><value>true</value></property>
+		<property name="maximizeEnabled"><value>true</value></property>
+	</bean>
+
+	<bean id="webservice"
+		class="org.owasp.webscarab.plugins.webservices.Wsdl">
+		<property name="httpService"><ref bean="httpService"/></property>
+	</bean>
+	
+	<bean id="webservicesView"
+		class="org.springframework.richclient.application.docking.vldocking.VLDockingViewDescriptor">
+		<property name="viewClass"><value>org.owasp.webscarab.plugins.webservices.swing.WebServicesView</value></property>
+		<property name="viewProperties">
+			<map>
+				<entry key="eventService">
+					<ref bean="eventService" />
+				</entry>
+				<entry key="httpService">
+					<ref bean="httpService" />
+				</entry>
+				<entry key="wsdl">
+					<ref bean="webservice" />
+				</entry>
+			</map>
+		</property>
+		<property name="autoHideEnabled"><value>true</value></property>
+		<property name="closeEnabled"><value>true</value></property>
+		<property name="floatEnabled"><value>true</value></property>
+		<property name="maximizeEnabled"><value>true</value></property>
+	</bean>
+
+        <bean id="spiderView"
+		class="org.springframework.richclient.application.docking.vldocking.VLDockingViewDescriptor">
+		<property name="viewClass"><value>org.owasp.webscarab.plugins.spider.swing.SpiderView</value></property>
+		<property name="viewProperties">
+			<map>
+				<entry key="spider">
+					<ref bean="spider" />
+				</entry>
+				<entry key="eventService">
+					<ref bean="eventService" />
+				</entry>
+			</map>
+		</property>
+		<property name="autoHideEnabled"><value>true</value></property>
+		<property name="closeEnabled"><value>true</value></property>
+		<property name="floatEnabled"><value>true</value></property>
+		<property name="maximizeEnabled"><value>true</value></property>
+	</bean>
+
+	<bean id="trustManager" class="org.owasp.webscarab.util.httpclient.ConfigurableTrustManager"/>
+
+	<bean id="sslProtocolSocketFactory" class="org.owasp.webscarab.util.httpclient.ConfigurableSSLProtocolSocketFactory">
+		<property name="trustManager" ref="trustManager"/>
+	</bean>
+
+	<bean id="httpService" class="org.owasp.webscarab.services.HttpService" lazy-init="default">
+		<property name="sslProtocolSocketFactory" ref="sslProtocolSocketFactory"/>
+		<property name="proxyChooser" ref="proxyChooser"/>
+		<property name="credentialsProvider">
+			<bean class="org.owasp.webscarab.util.httpclient.swing.SwingCredentialsProvider"/>
+		</property>
+	</bean>
+
+	<bean id="proxyChooser" class="org.owasp.webscarab.util.httpclient.ProxyChooser">
+		<property name="proxyConfig" ref="proxyConfig"/>
+	</bean>
+
+	<bean id="proxyConfig" class="org.owasp.webscarab.util.httpclient.PreferencesProxyConfig"/>
+
+	<bean id="proxy" class="org.owasp.webscarab.plugins.proxy.Proxy" lazy-init="true">
+		<property name="eventService" ref="eventService"/>
+		<property name="proxyInterceptor" ref="proxyInterceptor"/>
+		<property name="httpService" ref="httpService"/>
+	</bean>
+
+        <bean id="spider" class="org.owasp.webscarab.plugins.spider.Spider" lazy-init="true" singleton="true">
+            <property name="eventService" ref="eventService"/>
+            <property name="cookieManager" ref="webscarabCookieManager"/>
+            <property name="conversationService" ref="conversationService"/>
+            <property name="proxy" ref="proxy"/>
+            <property name="uriDao" ref="uriDao"/>
+        </bean>
+
+        <bean id="spiderConfig" class="org.owasp.webscarab.util.SpiderConfig" lazy-init="true" singleton="true">
+            <property name="headerConfigurationDao" ref="headerConfigurationDao"/>
+            <property name="formValueConfigurationDao" ref="formValueConfigurationDao"/>
+            <property name="namedValueDao" ref="namedValueDao"/>
+        </bean>
+
+        <bean id="webscarabCookieManager" class="org.owasp.webscarab.domain.WebScarabCookieManager" lazy-init="true" singleton="true">
+             <property name="eventService" ref="eventService"/>
+             <property name="cookiesDao" ref="cookiesDao"/>
+        </bean>
+
+	<bean id="proxyInterceptor"
+		class="org.owasp.webscarab.plugins.proxy.swing.SwingInterceptor" singleton="true">
+	</bean>
+
+	<bean id="proxyControlBar" class="org.owasp.webscarab.plugins.proxy.swing.ProxyControlBar" singleton="true">
+		<property name="proxy" ref="proxy"/>
+		<property name="swingInterceptor" ref="proxyInterceptor"/>
+		<!-- property name="interceptRequestCommandGroup" ref="proxyInterceptRequestGroup"/-->
+		<property name="interceptRequestCommand" ref="interceptRequestToggleCommand"/>
+		<property name="interceptResponseCommand" ref="interceptResponseToggleCommand"/>
+	</bean>
+
+	<bean id="showProxyControlBarToggleCommand"
+		class="org.owasp.webscarab.plugins.proxy.swing.ShowProxyControlBarToggleCommand" singleton="true">
+		<property name="proxyControlBar" ref="proxyControlBar"/>
+	</bean>
+
+	<bean id="interceptRequestToggleCommand"
+		class="org.owasp.webscarab.plugins.proxy.swing.InterceptRequestCommand" singleton="true">
+		<property name="swingInterceptor" ref="proxyInterceptor"/>
+	</bean>
+
+
+	<bean id="interceptResponseToggleCommand"
+		class="org.owasp.webscarab.plugins.proxy.swing.InterceptResponseCommand" singleton="true">
+		<property name="swingInterceptor" ref="proxyInterceptor"/>
+	</bean>
+
+	<bean id="sharedCommandConfigurer"
+		class="org.owasp.webscarab.ui.rcp.SharedCommandConfigurer" singleton="true" lazy-init="false">
+		<property name="commandConfigurer" ref="commandConfigurer"/>
+		<property name="commands">
+			<list>
+				<ref bean="showProxyControlBarToggleCommand"/>
+				<ref bean="proxyInterceptRequestGroup"/>
+				<ref bean="interceptRequestAll"/>
+				<ref bean="interceptRequestGet"/>
+				<ref bean="interceptRequestGetPost"/>
+				<ref bean="interceptRequestPost"/>
+				<ref bean="interceptRequestToggleCommand"/>
+				<ref bean="interceptResponseToggleCommand"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="interceptRequestGet"
+		class="org.owasp.webscarab.plugins.proxy.swing.InterceptMethodsToggleCommand">
+		<property name="swingInterceptor" ref="proxyInterceptor"/>
+		<property name="interceptRequestMethods">
+			<list><value>GET</value></list>
+		</property>
+	</bean>
+
+	<bean id="interceptRequestPost"
+		class="org.owasp.webscarab.plugins.proxy.swing.InterceptMethodsToggleCommand">
+		<property name="swingInterceptor" ref="proxyInterceptor"/>
+		<property name="interceptRequestMethods">
+			<list><value>POST</value></list>
+		</property>
+	</bean>
+
+	<bean id="interceptRequestGetPost"
+		class="org.owasp.webscarab.plugins.proxy.swing.InterceptMethodsToggleCommand">
+		<property name="swingInterceptor" ref="proxyInterceptor"/>
+		<property name="interceptRequestMethods">
+			<list><value>GET</value><value>POST</value></list>
+		</property>
+	</bean>
+
+	<bean id="interceptRequestAll"
+		class="org.owasp.webscarab.plugins.proxy.swing.InterceptMethodsToggleCommand">
+		<property name="swingInterceptor" ref="proxyInterceptor"/>
+	</bean>
+
+	<bean id="proxyInterceptRequestGroup"
+		class="org.springframework.richclient.command.CommandGroupFactoryBean">
+		<property name="exclusive"><value>true</value></property>
+		<property name="members">
+			<list>
+				<ref bean="interceptRequestGet"/>
+				<ref bean="interceptRequestPost"/>
+				<ref bean="interceptRequestGetPost"/>
+				<ref bean="interceptRequestAll"/>
+			</list>
+		</property>
+		<property name="allowsEmptySelection"><value>false</value></property>
+	</bean>
+
+</beans>
