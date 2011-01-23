@@ -3,10 +3,13 @@
  */
 package org.owasp.webscarab.ui.rcp;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.util.prefs.Preferences;
 
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.plaf.BorderUIResource.LineBorderUIResource;
 
 import org.bushe.swing.event.EventService;
 import org.owasp.webscarab.WebScarab;
@@ -38,6 +41,7 @@ public class WebScarabLifecycleAdvisor extends
 		super.onPreWindowOpen(configurer);
 		// comment out to hide the menubar, toolbar, or reduce window size...
 		// configurer.setShowMenuBar(false);
+
 		configurer.setShowToolBar(true);
         configurer.setInitialSize(new Dimension(970, 700));
 		configurer.setShowStatusBar(true);

@@ -5,7 +5,7 @@
 		<description kind="tooltip">WebScarab-NG</description>
 		<homepage href="http://www.owasp.org/index.php/OWASP_WebScarab_Project" />
 		<vendor>OWASP</vendor>
-		<icon kind="splash" href="splashscreen.gif"/>
+            <icon kind="splash" href="splashscreen.gif"/>
 		<icon href="webscarab_logo.gif" width="64" height="64" />
 
 		<offline-allowed/>
