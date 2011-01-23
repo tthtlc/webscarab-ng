@@ -205,7 +205,7 @@
     <bean id="aboutCommand"
 		class="org.springframework.richclient.command.support.AboutCommand">
         <property name="aboutTextPath">
-            <value>org/owasp/webscarab/about.txt</value>
+            <value>about.txt</value>
         </property>
     </bean>
 
