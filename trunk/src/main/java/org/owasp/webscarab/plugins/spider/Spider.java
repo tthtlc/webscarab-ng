@@ -58,6 +58,9 @@ import org.owasp.webscarab.plugins.spider.swing.SpiderFetchEvent;
 import org.owasp.webscarab.plugins.spider.swing.SpiderStartEvent;
 import org.owasp.webscarab.services.ConversationService;
 import org.owasp.webscarab.util.SpiderConfig;
+import org.springframework.richclient.application.Application;
+import org.springframework.richclient.application.ApplicationWindow;
+import org.springframework.richclient.application.statusbar.StatusBar;
 
 /**
  * @author lpz
@@ -129,20 +132,21 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
             uris.add(u);
         return uris;
     }
-
+    //TODO
     public String getUriHash(URI uri) {
         return uri.toASCIIString();
     }
 
     synchronized public boolean checkIfCanBeFetched(URI uri) {
         String hash = getUriHash(uri);
-        if (!fetchedURIs.contains(hash) && hash.matches(Spider.this.spiderConfig.getAllowedPattern())
+        if (hash.matches(Spider.this.spiderConfig.getAllowedPattern())
                 && !hash.matches(Spider.this.spiderConfig.getDisallowedPattern())) {
+            //notifing spider view
             URIFoundEvent ufe = new URIFoundEvent(Spider.this, uri, new Date());
             this.getEventService().publish(ufe);
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     public void clearFetchedUris() {
@@ -384,7 +388,6 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
                 currentInputs = new ArrayList<WebscarabTag.Input>();
             } else if (HTML.Tag.INPUT == t) {
                 currentInputs.add(new WebscarabTag.Input(t, a));
-
             } else {
                 handleSimpleTag(t, a, pos);
             }
@@ -453,7 +456,15 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
         public void setConversationService(ConversationService conversationService) {
             this.conversationService = conversationService;
         }
-
+         public void updateStatusBar(int i){
+             ApplicationWindow aw = Application.instance().getActiveWindow();
+             StatusBar sb = aw.getStatusBar();
+             sb.setVisible(true);
+             if(i!=0)
+                sb.setMessage("Spider is running: "+i +" threads..."); //TODO: resources
+             else
+                 sb.setMessage("Spider is not runing");
+        }
         public synchronized void incrementThreads() throws InterruptedException {
 
             synchronized (spiderThreadsMonitor) {
@@ -461,6 +472,7 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
                 if (threadCount >= spiderConfig.getMaxThreads()) {
                     spiderThreadsMonitor.wait();
                 }
+                updateStatusBar(threadCount);
             }
         }
 
@@ -468,6 +480,7 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
 
             synchronized (spiderThreadsMonitor) {
                 threadCount--;
+                updateStatusBar(threadCount);
                 spiderThreadsMonitor.notify();
             }
         }
@@ -629,13 +642,13 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
 
         public void run() {
             try {
-                this.incrementThreads();
-                if (checkIfCanBeFetched(uri)) {
+                if (!checkIfCanBeFetched(uri)) {
                     return;
                 } else {
                     addFetchedUri(uri);
                 }
-
+                this.incrementThreads();
+                
                 HttpURLConnection ucon = prepareConnection(uri.toURL(), parameters);
                 String contentType = ucon.getContentType();
                 if ((contentType != null) && contentType.matches(Spider.this.spiderConfig.getFetchPattern())) {
