@@ -78,7 +78,7 @@ public class ContentTabbedPane extends JTabbedPane {
         forms.add(new XmlForm(model, headerProperty, contentProperty));
         forms.add(new TextForm(model, headerProperty, contentProperty));
     	forms.add(new HexForm(model, headerProperty, contentProperty));
-    	listener = new Listener();
+        listener = new Listener();
     	NamedValue[] headers = (NamedValue[]) model.getValueModel(headerProperty).getValue();
     	String contentType = NamedValue.get("Content-Type", headers);
     	showForms(contentType);
@@ -91,7 +91,7 @@ public class ContentTabbedPane extends JTabbedPane {
     	while (it.hasNext()) {
     		ContentForm contentForm = it.next();
     		if (contentForm.canHandle(contentType)) {
-    			addTab(contentForm.getId(), contentForm.getControl());
+    			addTab(contentForm.getTitle(), contentForm.getControl());
     		}
     	}
     }

@@ -10,7 +10,7 @@ import org.springframework.richclient.form.Form;
  *
  */
 public interface ContentForm extends Form {
-
+        String getTitle();
 	boolean canHandle(String contentType);
 	
 }

@@ -66,8 +66,8 @@ import org.springframework.richclient.application.statusbar.StatusBar;
  * @author lpz
  */
 public class Spider implements ApplicationContextAware, EventSubscriber {
-    private Proxy proxy;
 
+    private Proxy proxy;
     //list of visited uris
     private ArrayList<URI> uris;
     private ApplicationContext applicationContext;
@@ -75,19 +75,15 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
     private ConversationService conversationService;
     private WebScarabCookieManager webscarabCookieManager;
     private Session session;
-
     private int threadCount = 0;
     private final Object spiderThreadsMonitor = new Object();
     private boolean enabled = true;
-    
     private UriDao uriDao;
-
     private SpiderConfig spiderConfig;
-    
     final private ArrayList<String> fetchedURIs;
 
     public UriDao getUriDao() {
-        
+
         return uriDao;
     }
 
@@ -111,7 +107,6 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
         this.threadCount = threadCount;
     }
 
-
     public boolean isEnabled() {
         return enabled;
     }
@@ -125,14 +120,15 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
         fetchedURIs = new ArrayList<String>();
     }
 
-
     public ArrayList<URI> getURIs() {
         uris.clear();
-        for(URI u: uriDao.getAll())
+        for (URI u : uriDao.getAll()) {
             uris.add(u);
+        }
         return uris;
     }
     //TODO
+
     public String getUriHash(URI uri) {
         return uri.toASCIIString();
     }
@@ -262,7 +258,7 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
     public void onEvent(EventServiceEvent ese) {
         if (ese instanceof SessionEvent) {
             SessionEvent event = (SessionEvent) ese;
-            spiderConfig = (SpiderConfig)applicationContext.getBean("spiderConfig");
+            spiderConfig = (SpiderConfig) applicationContext.getBean("spiderConfig");
             if (event.getType() == SessionEvent.SESSION_CHANGED) {
                 setSession(event.getSession());
                 /*try {
@@ -456,15 +452,18 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
         public void setConversationService(ConversationService conversationService) {
             this.conversationService = conversationService;
         }
-         public void updateStatusBar(int i){
-             ApplicationWindow aw = Application.instance().getActiveWindow();
-             StatusBar sb = aw.getStatusBar();
-             sb.setVisible(true);
-             if(i!=0)
-                sb.setMessage("Spider is running: "+i +" threads..."); //TODO: resources
-             else
-                 sb.setMessage("Spider is not runing");
+
+        public void updateStatusBar(int i) {
+            ApplicationWindow aw = Application.instance().getActiveWindow();
+            StatusBar sb = aw.getStatusBar();
+            sb.setVisible(true);
+            if (i != 0) {
+                sb.setMessage("Spider is running: " + i + " threads..."); //TODO: resources
+            } else {
+                sb.setMessage("Spider is not runing");
+            }
         }
+
         public synchronized void incrementThreads() throws InterruptedException {
 
             synchronized (spiderThreadsMonitor) {
@@ -527,7 +526,7 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
         private HttpURLConnection prepareConnection(URL url, String data) throws IOException {
             HttpURLConnection ucon = (HttpURLConnection) (useProxy() ? url.openConnection(getProxyForSpider()) : url.openConnection());
             ucon.setRequestMethod(method.toUpperCase());
-            synchronized(spiderConfig.getHeaderConfigurations()) {
+            synchronized (spiderConfig.getHeaderConfigurations()) {
                 Iterator<HeaderConfiguration> it = spiderConfig.getHeaderConfigurations().iterator();
                 while (it.hasNext()) {
                     HeaderConfiguration hc = it.next();
@@ -648,11 +647,12 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
                     addFetchedUri(uri);
                 }
                 this.incrementThreads();
-                
+
                 HttpURLConnection ucon = prepareConnection(uri.toURL(), parameters);
                 String contentType = ucon.getContentType();
                 if ((contentType != null) && contentType.matches(Spider.this.spiderConfig.getFetchPattern())) {
                     ContentHandler h = this.fctry.createContentHandler(ucon.getContentType());
+
                     byte[] content = null;
                     Object o = h.getContent(ucon);
                     if (o instanceof String) {
@@ -737,7 +737,9 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
     }
 
     class Listener {
+
         private HeaderConfiguration configuration;
+
         public Listener(HeaderConfiguration configuration) throws IOException {
             this.configuration = configuration;
 

@@ -79,6 +79,8 @@ public class HtmlForm extends AbstractContentForm {
 		editorPane.setEditorKit(kit);
 		editorPane.setDocument(doc);
 	}
+
+   
 	
 	private static class MyHTMLEditorKit extends HTMLEditorKit {
 

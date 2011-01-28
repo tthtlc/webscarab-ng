@@ -44,6 +44,7 @@ public class HexForm extends AbstractContentForm {
 	public HexForm(FormModel model, String headerPropertyName,
 			String contentPropertyName) {
 		super(model, FORM_ID, headerPropertyName, contentPropertyName);
+                
 	}
 
 	@Override

@@ -111,6 +111,7 @@
 				<value>conversationListView</value>
 				<value>conversationView</value>
                                 <value>spiderView</value>
+                                <value>consoleView</value>
 			</list>
 		</property>
 		<property name="initialLayout">
@@ -355,6 +356,22 @@
 				<entry key="spider">
 					<ref bean="spider" />
 				</entry>
+				<entry key="eventService">
+					<ref bean="eventService" />
+				</entry>
+			</map>
+		</property>
+		<property name="autoHideEnabled"><value>true</value></property>
+		<property name="closeEnabled"><value>true</value></property>
+		<property name="floatEnabled"><value>true</value></property>
+		<property name="maximizeEnabled"><value>true</value></property>
+	</bean>
+
+        <bean id="consoleView"
+		class="org.springframework.richclient.application.docking.vldocking.VLDockingViewDescriptor">
+		<property name="viewClass"><value>org.owasp.webscarab.plugins.console.swing.ConsoleView</value></property>
+		<property name="viewProperties">
+			<map>
 				<entry key="eventService">
 					<ref bean="eventService" />
 				</entry>
