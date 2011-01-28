@@ -56,6 +56,9 @@
 		class="org.owasp.webscarab.ui.rcp.ShowCookieManagerCommand" singleton="true">
                 <property name="cookieManager" ref="webscarabCookieManager"/>
    </bean>
+   <bean id="showConsoleCommand"
+		class="org.owasp.webscarab.ui.rcp.ShowConsoleCommand" singleton="true">
+   </bean>
     <bean id="showSpiderManualCommand"
 		class="org.owasp.webscarab.ui.rcp.ShowSpiderManualCommand" singleton="true">
                 <property name="eventService" ref="eventService"/>
@@ -68,6 +71,7 @@
                 <value>manualRequestCommand</value>
                 <ref bean="showTranscoderCommand"/>
                 <ref bean="showCookieManagerCommand"/>
+                <ref bean="showConsoleCommand"/>
             </list>
         </property>
     </bean>
