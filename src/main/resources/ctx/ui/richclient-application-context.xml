@@ -368,7 +368,7 @@
 	</bean>
 
         <bean id="consoleView"
-		class="org.springframework.richclient.application.docking.vldocking.VLDockingViewDescriptor">
+        	class="org.springframework.richclient.application.docking.vldocking.VLDockingViewDescriptor">
 		<property name="viewClass"><value>org.owasp.webscarab.plugins.console.swing.ConsoleView</value></property>
 		<property name="viewProperties">
 			<map>
