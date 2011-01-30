@@ -1,0 +1,6 @@
+<h1>About WebScarab</h1>
+
+<h2>WebScarab is a product of the Open Web Application Security Project (OWASP)</h2>
+
+<p>WebScarab is run by Daniel Brzozowski (daniel AT brzozowski.biz)</p>
+<p>For more information please visit <a href="http://www.owasp.org/index.php/Category:OWASP_WebScarab_NG_Project">Project Page</a> </p>
