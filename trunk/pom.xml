@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.owasp.webscarab</groupId>
     <artifactId>WebScarab-ng</artifactId>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
     <description>The OWASP Web Application Security review tool</description>
     <mailingLists>
         <mailingList>
@@ -28,7 +28,7 @@
         <developer>
             <id>lpz</id>
             <name>Daniel Brzozowski</name>
-            <email>webscarab@brzozowski.biz</email>
+            <email>owasp-webscarab@lists.owasp.org</email>
             <roles>
                 <role>Project leader</role>
                 <role>Java developer</role>
