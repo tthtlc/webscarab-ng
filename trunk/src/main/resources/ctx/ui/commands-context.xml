@@ -56,8 +56,9 @@
 		class="org.owasp.webscarab.ui.rcp.ShowCookieManagerCommand" singleton="true">
                 <property name="cookieManager" ref="webscarabCookieManager"/>
    </bean>
-   <bean id="showConsoleCommand"
-		class="org.owasp.webscarab.ui.rcp.ShowConsoleCommand" singleton="true">
+   <bean id="showConsoleToggleCommand"
+		class="org.springframework.richclient.command.support.ShowViewCommand" singleton="true">
+                <property name="viewDescriptor" ref="consoleView" />
    </bean>
     <bean id="showSpiderManualCommand"
 		class="org.owasp.webscarab.ui.rcp.ShowSpiderManualCommand" singleton="true">
@@ -71,7 +72,7 @@
                 <value>manualRequestCommand</value>
                 <ref bean="showTranscoderCommand"/>
                 <ref bean="showCookieManagerCommand"/>
-                <ref bean="showConsoleCommand"/>
+                <ref bean="showConsoleToggleCommand"/>
             </list>
         </property>
     </bean>
