@@ -29,10 +29,9 @@ import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import org.owasp.webscarab.plugins.spider.swing.SpiderContextMenu;
 import org.owasp.webscarab.plugins.spider.swing.SpiderPopupAdapter;
+import org.owasp.webscarab.plugins.spider.swing.SpiderPopupListener;
 
 /**
  * @author rdawes
@@ -46,7 +45,7 @@ public class SiteMapView extends AbstractView implements SpiderPopupAdapter {
     private FilterList<Conversation> conversationList;
     private EventService eventService;
     private Listener listener = new Listener();
-    private PopupListener popuplistener = new PopupListener();
+    private SpiderPopupListener popuplistener;
     private JTree uriTree;
     private UriTreeModel uriTreeModel;
     private SpiderContextMenu spiderPopup;
@@ -54,7 +53,7 @@ public class SiteMapView extends AbstractView implements SpiderPopupAdapter {
     public SiteMapView() {
         uris = new ArrayList<URI>();
         uriTreeModel = new UriTreeModel();
-
+         popuplistener = new SpiderPopupListener(this);
     }
 
     public void setSpiderPopup(SpiderContextMenu popup) {
@@ -124,26 +123,16 @@ public class SiteMapView extends AbstractView implements SpiderPopupAdapter {
         return this.selectedUris;
     }
 
-    private class PopupListener extends MouseAdapter {
+    public String[] getSelectedMethods() {
+        return selectedMethods;
+    }
 
-        @Override
-        public void mousePressed(MouseEvent e) {
-            maybeShowPopup(e);
-        }
+    public URI[] getSelectedURIs() {
+        return this.selectedUris;
+    }
 
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            maybeShowPopup(e);
-        }
-
-        private void maybeShowPopup(MouseEvent e) {
-            if (e.isPopupTrigger()) {
-                spiderPopup.setSelectedUris(SiteMapView.this.selectedUris);
-                spiderPopup.setSelectedMethods(SiteMapView.this.selectedMethods);
-                spiderPopup.show(e.getComponent(),
-                        e.getX(), e.getY());
-            }
-        }
+    public SpiderContextMenu getSpiderContextMenu() {
+        return spiderPopup;
     }
 
     private class Listener implements ListEventListener<Conversation>,

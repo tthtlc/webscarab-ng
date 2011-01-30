@@ -27,6 +27,8 @@ import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -40,14 +42,13 @@ import org.owasp.webscarab.plugins.spider.Spider;
  * @author lpz
  *
  */
-public class SpiderView extends AbstractView {
+public class SpiderView extends AbstractView implements SpiderPopupAdapter{
     //
+
     private String SPIDER_TOGGLE_ON = "ON";
     private String SPIDER_TOGGLE_OFF = "OFF";
     private String SPIDER_FETCH = "Spider";
     private String SPIDER_OPTIONS = "Configure";
-
-    
     private EventService eventService;
     private Listener listener = new Listener();
     private ButtonListener btnListener = new ButtonListener();
@@ -60,19 +61,27 @@ public class SpiderView extends AbstractView {
     JButton spiderOptBtn = getComponentFactory().createButton(SPIDER_OPTIONS);
     URI[] selectedURIs = null;
     String[] selectedMethods = null;
+    private SpiderContextMenu spiderPopup;
+    private SpiderPopupListener popuplistener;
 
     public SpiderView() {
         uriTreeModel = new UriTreeModel();
         tbtn.setIcon(getIconSource().getIcon("spider.small"));
         tbtn.setEnabled(true);
         fetchBtn.setEnabled(false);
+        popuplistener = new SpiderPopupListener(this);
     }
 
+    public void setSpiderPopup(SpiderContextMenu popup) {
+        this.spiderPopup = popup;
+        this.spiderPopup.setEventService(this.eventService);
+    }
     /*
      * (non-Javadoc)
      *
      * @see org.springframework.richclient.application.support.AbstractView#createControl()
      */
+
     @Override
     protected JComponent createControl() {
         uriTree = new JTree(uriTreeModel);
@@ -80,7 +89,8 @@ public class SpiderView extends AbstractView {
         uriTree.setShowsRootHandles(true);
         uriTree.setCellRenderer(new UriRenderer());
         uriTree.addTreeSelectionListener(listener);
-
+        uriTree.addMouseListener(popuplistener);
+        
         JPanel main = getComponentFactory().createPanel();
         BorderLayout sl = new BorderLayout();
         JScrollPane scrollPane = getComponentFactory().createScrollPane(uriTree,
@@ -120,28 +130,32 @@ public class SpiderView extends AbstractView {
     public URI[] getSelectedURIs() {
         return selectedURIs;
     }
+
     public String[] getSelectedMethods() {
         return selectedMethods;
     }
+
+    public SpiderContextMenu getSpiderContextMenu() {
+        return spiderPopup;
+    }
+
     private class ButtonListener implements ActionListener {
 
         /*
          * Listener for all buttons on spider view
          */
-
         public void actionPerformed(ActionEvent e) {
             Object source = e.getSource();
             //toggle spider button
             if (source == tbtn) {
                 boolean btnVal = tbtn.isSelected();
-                if(btnVal)
+                if (btnVal) {
                     tbtn.setText(SPIDER_TOGGLE_ON);
-                else {
+                } else {
                     tbtn.setText(SPIDER_TOGGLE_OFF);
                 }
                 spider.setEnabled(btnVal);
-            }
-            else if(source == fetchBtn) {
+            } else if (source == fetchBtn) {
                 eventService.publish(new SpiderStartEvent(this, getSelectedURIs(), getSelectedMethods(), new Date()));
             } else if (source == spiderOptBtn) {
                 SpiderConfigDialog dialog = new SpiderConfigDialog(spider, SpiderView.this.getApplicationContext());
@@ -234,12 +248,14 @@ public class SpiderView extends AbstractView {
                 if (spider.addURI(uri)) {
                     uriTreeModel.add(uri);
                 }
-            } else if(ese instanceof SessionEvent) {
+            } else if (ese instanceof SessionEvent) {
                 //populating uris
-                for(URI u: spider.getURIs())
+                for (URI u : spider.getURIs()) {
                     uriTreeModel.add(u);
+                }
             }
 
         }
     }
+   
 }

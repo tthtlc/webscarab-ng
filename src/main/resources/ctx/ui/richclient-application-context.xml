@@ -359,6 +359,9 @@
 				<entry key="eventService">
 					<ref bean="eventService" />
 				</entry>
+                                 <entry key="spiderPopup">
+					<ref bean="spiderPopup" />
+				</entry>
 			</map>
 		</property>
 		<property name="autoHideEnabled"><value>true</value></property>
