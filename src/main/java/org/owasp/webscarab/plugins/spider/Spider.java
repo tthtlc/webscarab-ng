@@ -561,11 +561,13 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
 
         private String getValueForInput(String name, String value) {
             String newVal = value == null ? "" : value;
-            Iterator<FormValueConfiguration> it = spiderConfig.getFormValuesConfigurations().iterator();
-            while (it.hasNext()) {
-                FormValueConfiguration fvc = it.next();
-                if (name.matches(fvc.getFormName()) && (fvc.getOverwrite() || newVal.isEmpty())) {
-                    newVal = fvc.getFormValue();
+            synchronized (spiderConfig) {
+                Iterator<FormValueConfiguration> it = spiderConfig.getFormValuesConfigurations().iterator();
+                while (it.hasNext()) {
+                    FormValueConfiguration fvc = it.next();
+                    if (name.matches(fvc.getFormName()) && (fvc.getOverwrite() || newVal.isEmpty())) {
+                        newVal = fvc.getFormValue();
+                    }
                 }
             }
             return newVal;
