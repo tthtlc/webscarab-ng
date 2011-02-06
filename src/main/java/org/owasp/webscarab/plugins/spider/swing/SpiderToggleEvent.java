@@ -3,13 +3,12 @@
  */
 package org.owasp.webscarab.plugins.spider.swing;
 
-import org.owasp.webscarab.ui.rcp.*;
 import java.net.URI;
 
 import org.bushe.swing.event.EventServiceEvent;
 
 /**
- * @author rdawes
+ * @author lpz
  *
  */
 public class SpiderToggleEvent implements EventServiceEvent {

@@ -16,10 +16,6 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.swingx.JXTable;
-import org.owasp.webscarab.domain.Annotation;
-import org.owasp.webscarab.domain.Conversation;
-import org.owasp.webscarab.services.ConversationService;
-import org.owasp.webscarab.util.UrlUtils;
 import org.owasp.webscarab.util.swing.renderers.DateRenderer;
 import org.owasp.webscarab.util.swing.renderers.TableColorProvider;
 import org.owasp.webscarab.util.swing.renderers.TableColorRenderer;
@@ -36,7 +32,7 @@ import javax.swing.table.TableColumnModel;
 import org.owasp.webscarab.plugins.console.WebScarabLogRecord;
 
 /**
- * @author rdawes
+ * @author lpz
  *
  */
 public class ConsoleTableFactory extends ApplicationServicesAccessor {

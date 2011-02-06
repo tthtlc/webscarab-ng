@@ -61,11 +61,12 @@ import org.owasp.webscarab.util.SpiderConfig;
 import org.springframework.richclient.application.Application;
 import org.springframework.richclient.application.ApplicationWindow;
 import org.springframework.richclient.application.statusbar.StatusBar;
+import org.springframework.richclient.application.support.ApplicationServicesAccessor;
 
 /**
  * @author lpz
  */
-public class Spider implements ApplicationContextAware, EventSubscriber {
+public class Spider extends ApplicationServicesAccessor implements ApplicationContextAware, EventSubscriber  {
 
     private Proxy proxy;
     //list of visited uris
@@ -362,7 +363,7 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
             }
 
             if (href.toLowerCase().startsWith("mailto:")) {
-                Logger.getLogger(Spider.class.getName()).log(Level.INFO, "Mail address found {0}", href);
+                Logger.getLogger(Spider.class.getName()).log(Level.INFO, Spider.this.getMessage("spider.mailFound.message"), href);
                 return;
             }
             if (href.toLowerCase().startsWith("javascript:")) {
@@ -458,9 +459,9 @@ public class Spider implements ApplicationContextAware, EventSubscriber {
             StatusBar sb = aw.getStatusBar();
             sb.setVisible(true);
             if (i != 0) {
-                sb.setMessage("Spider is running: " + i + " threads..."); //TODO: resources
+                sb.setMessage(String.format(Spider.this.getMessage("spider.statusBar.yes.message"),i)); 
             } else {
-                sb.setMessage("Spider is not runing");
+                sb.setMessage( Spider.this.getMessage("spider.statusBar.no.message"));
             }
         }
 

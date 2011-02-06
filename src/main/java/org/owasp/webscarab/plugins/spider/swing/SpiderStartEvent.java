@@ -9,7 +9,7 @@ import java.util.Date;
 import org.bushe.swing.event.EventServiceEvent;
 
 /**
- * @author rdawes
+ * @author lpz
  *
  */
 public class SpiderStartEvent implements EventServiceEvent {

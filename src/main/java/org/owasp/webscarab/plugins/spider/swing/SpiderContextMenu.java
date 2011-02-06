@@ -23,7 +23,7 @@ public class SpiderContextMenu extends JPopupMenu {
     private String[] selectedMethods = new String[0];
 
     public SpiderContextMenu() {
-        JMenuItem fetch = new JMenuItem("Spider");
+        JMenuItem fetch = new JMenuItem("Spider");//TODO resources
         JMenuItem fetchRec = new JMenuItem("Spider recursively");
 
         fetch.addActionListener(new ActionListener() {

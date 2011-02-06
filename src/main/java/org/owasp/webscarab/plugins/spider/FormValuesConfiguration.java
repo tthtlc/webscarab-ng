@@ -3,7 +3,6 @@
  */
 package org.owasp.webscarab.plugins.spider;
 
-import org.owasp.webscarab.plugins.proxy.*;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
