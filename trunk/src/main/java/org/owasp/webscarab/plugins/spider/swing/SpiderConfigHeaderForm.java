@@ -106,8 +106,8 @@ public class SpiderConfigHeaderForm extends AbstractTableMasterForm {
                 jbtCommit = new JButton(actionCommit);
                 jbtCancel = new JButton(actionCancel);
                 jbtCommit.setEnabled(false);
-                jbtCommit.setText("Save");
-                jbtCancel.setText("Cancel");
+                jbtCommit.setText(getMessage("spider.configHeader.save.label"));
+                jbtCancel.setText(getMessage("spider.configHeader.cancel.label"));
                 jbtCancel.setEnabled(false);
                 buttonBar.add(jbtCommit);
                 buttonBar.add(jbtCancel);

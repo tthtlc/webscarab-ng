@@ -203,7 +203,7 @@ public class ConsoleView extends AbstractView implements EventSubscriber, Action
                     }
                     out.close();
                 } catch (IOException ex) {
-                    log.log(Level.SEVERE, "Writing to log file", ex);
+                    log.log(Level.SEVERE, "Error with writing to log file", ex);
                 }
 
             }
@@ -244,7 +244,7 @@ public class ConsoleView extends AbstractView implements EventSubscriber, Action
         }
 
         public String getDescription() {
-            return ".txt text files";
+            return getMessage("consoleView.saveWindow.fileDescription.label");
         }
     }
 }
