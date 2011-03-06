@@ -2,8 +2,8 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.owasp.webscarab</groupId>
-    <artifactId>WebScarab-ng</artifactId>
-    <version>0.2.2</version>
+    <artifactId>WebScarab-NG</artifactId>
+    <version>0.3.0</version>
     <description>The OWASP Web Application Security review tool</description>
     <mailingLists>
         <mailingList>
@@ -293,6 +293,6 @@
             <version>0.3</version>
         </dependency>
     </dependencies>
-    <name>WebScarab-Dev - org.owasp.webscarab:WebScarab-ng:jar:0.2.1</name>
+    <name>WebScarab-Dev - org.owasp.webscarab:WebScarab-ng:jar:0.3.0</name>
     
 </project>
