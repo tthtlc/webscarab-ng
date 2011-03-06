@@ -7,6 +7,8 @@ import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -45,79 +47,67 @@ import org.springframework.richclient.form.FormModelHelper;
  */
 public class ManualRequestView extends AbstractView {
 
-	private FormModel conversationFormModel;
-	private FormModel annotationFormModel;
-
+    Logger log = Logger.getLogger(this.getClass().getName());
+    private FormModel conversationFormModel;
+    private FormModel annotationFormModel;
     private EventService eventService;
-
     private HttpService httpService;
-
     private Session session;
-
     private Fetcher activeFetcher;
-
     private Listener listener;
-
     private ConversationService conversationService;
-
     private RequestEditListener editListener = new RequestEditListener();
-
     private FetchCommand fetchCommand;
-
     private RevertCommand revertCommand;
-    
-    private String[] requestFields = new String[] {
-            Conversation.PROPERTY_REQUEST_METHOD,
-            Conversation.PROPERTY_REQUEST_URI,
-            Conversation.PROPERTY_REQUEST_VERSION,
-            Conversation.PROPERTY_REQUEST_HEADERS,
-            Conversation.PROPERTY_REQUEST_CONTENT,
-            Conversation.PROPERTY_REQUEST_PROCESSED_CONTENT,
-    };
+    private String[] requestFields = new String[]{
+        Conversation.PROPERTY_REQUEST_METHOD,
+        Conversation.PROPERTY_REQUEST_URI,
+        Conversation.PROPERTY_REQUEST_VERSION,
+        Conversation.PROPERTY_REQUEST_HEADERS,
+        Conversation.PROPERTY_REQUEST_CONTENT,
+        Conversation.PROPERTY_REQUEST_PROCESSED_CONTENT,};
+    private String[] responseFields = new String[]{
+        Conversation.PROPERTY_RESPONSE_VERSION,
+        Conversation.PROPERTY_RESPONSE_STATUS,
+        Conversation.PROPERTY_RESPONSE_MESSAGE,
+        Conversation.PROPERTY_RESPONSE_HEADERS,
+        Conversation.PROPERTY_RESPONSE_CONTENT,
+        Conversation.PROPERTY_RESPONSE_FOOTERS,};
 
-    private String[] responseFields = new String[] {
-            Conversation.PROPERTY_RESPONSE_VERSION,
-            Conversation.PROPERTY_RESPONSE_STATUS,
-            Conversation.PROPERTY_RESPONSE_MESSAGE,
-            Conversation.PROPERTY_RESPONSE_HEADERS,
-            Conversation.PROPERTY_RESPONSE_CONTENT,
-            Conversation.PROPERTY_RESPONSE_FOOTERS,
-    };
-
-	public ManualRequestView() {
-		conversationFormModel = ConversationFormSupport.createFormModel(new Conversation(), false, true, false);
-		annotationFormModel = FormModelHelper.createUnbufferedFormModel(new Annotation());
+    public ManualRequestView() {
+        conversationFormModel = ConversationFormSupport.createFormModel(new Conversation(), false, true, false);
+        annotationFormModel = FormModelHelper.createUnbufferedFormModel(new Annotation());
         addEditListener();
         listener = new Listener();
         fetchCommand = new FetchCommand();
         revertCommand = new RevertCommand();
-	}
+    }
 
     private void addEditListener() {
-        for (int i=0, len=requestFields.length; i<len; i++) {
+        for (int i = 0, len = requestFields.length; i < len; i++) {
             ValueModel vm = conversationFormModel.getValueModel(requestFields[i]);
             vm.addValueChangeListener(editListener);
         }
     }
 
     private void removeEditListener() {
-        for (int i=0, len=requestFields.length; i<len; i++) {
+        for (int i = 0, len = requestFields.length; i < len; i++) {
             ValueModel vm = conversationFormModel.getValueModel(requestFields[i]);
             vm.removeValueChangeListener(editListener);
         }
     }
 
-	/* (non-Javadoc)
-	 * @see org.springframework.richclient.dialog.AbstractDialogPage#createControl()
-	 */
-	@Override
-	protected JComponent createControl() {
+    /* (non-Javadoc)
+     * @see org.springframework.richclient.dialog.AbstractDialogPage#createControl()
+     */
+    @Override
+    protected JComponent createControl() {
         Form requestForm = new RequestForm(conversationFormModel);
         Form responseForm = new ResponseForm(conversationFormModel);
         Form annotationForm = new AnnotationForm(annotationFormModel);
         DialogPage page = new ManualRequestDialogPage(requestForm, responseForm, annotationForm);
         return DialogPageUtils.createStandardView(page, fetchCommand, revertCommand);
-	}
+    }
 
     public void displayConversation(Conversation conversation) {
         Conversation request;
@@ -138,11 +128,13 @@ public class ManualRequestView extends AbstractView {
     private void fetchConversation(Conversation request) {
         request.setDate(new Date());
         activeFetcher = new Fetcher(request);
-        httpService.fetchResponses(activeFetcher, 1, false);
+            httpService.fetchResponses(activeFetcher, 1, false);
     }
 
     private void error(Exception e) {
         e.printStackTrace();
+        log.log(Level.SEVERE, "doExecuteCommandError", e);
+
     }
 
     private void success(Conversation conversation) {
@@ -160,6 +152,7 @@ public class ManualRequestView extends AbstractView {
         conversation = (Conversation) conversationFormModel.getFormObject();
         return conversation;
     }
+
     /**
      * @param eventService the eventService to set
      */
@@ -183,9 +176,9 @@ public class ManualRequestView extends AbstractView {
      * @return Returns the conversationService.
      */
     private ConversationService getConversationService() {
-        if (conversationService == null)
-            conversationService = (ConversationService) getApplicationContext()
-                    .getBean("conversationService");
+        if (conversationService == null) {
+            conversationService = (ConversationService) getApplicationContext().getBean("conversationService");
+        }
         return conversationService;
     }
 
@@ -206,13 +199,17 @@ public class ManualRequestView extends AbstractView {
 
         private void handleEvent(ManualRequestCopyEvent mrce) {
             Object source = mrce.getSource();
-            if (!(source instanceof PageComponent)) return;
+            if (!(source instanceof PageComponent)) {
+                return;
+            }
             PageComponent pc = (PageComponent) source;
-            if (! pc.getContext().getPage().equals(getContext().getPage())) return;
+            if (!pc.getContext().getPage().equals(getContext().getPage())) {
+                return;
+            }
             displayConversation(mrce.getConversation());
         }
 
-        private void handleEvent(SessionEvent  evt) {
+        private void handleEvent(SessionEvent evt) {
             session = evt.getSession();
             displayConversation(null);
         }
@@ -221,7 +218,6 @@ public class ManualRequestView extends AbstractView {
     private class Fetcher implements ConversationGenerator {
 
         private Conversation request;
-
         private boolean executed = false;
 
         public Fetcher(Conversation request) {
@@ -232,10 +228,14 @@ public class ManualRequestView extends AbstractView {
          * @see org.owasp.webscarab.services.ConversationGenerator#errorFetchingResponse(org.owasp.webscarab.domain.Conversation, java.lang.Exception)
          */
         public void errorFetchingResponse(final Conversation request, final Exception e) {
-            if (!isActiveFetcher(this)) return;
+            if (!isActiveFetcher(this)) {
+                return;
+            }
             SwingUtilities.invokeLater(new Runnable() {
+
                 public void run() {
                     error(e);
+
                 }
             });
         }
@@ -244,8 +244,12 @@ public class ManualRequestView extends AbstractView {
          * @see org.owasp.webscarab.services.ConversationGenerator#getNextRequest()
          */
         public synchronized Conversation getNextRequest() {
-            if (!isActiveFetcher(this)) return null;
-            if (executed) return null;
+            if (!isActiveFetcher(this)) {
+                return null;
+            }
+            if (executed) {
+                return null;
+            }
             executed = true;
             return request;
         }
@@ -254,14 +258,16 @@ public class ManualRequestView extends AbstractView {
          * @see org.owasp.webscarab.services.ConversationGenerator#responseReceived(org.owasp.webscarab.domain.Conversation)
          */
         public void responseReceived(final Conversation conversation) {
-            if (!isActiveFetcher(this)) return;
+            if (!isActiveFetcher(this)) {
+                return;
+            }
             SwingUtilities.invokeLater(new Runnable() {
+
                 public void run() {
                     success(conversation);
                 }
             });
         }
-
     }
 
     private class RequestEditListener implements PropertyChangeListener {
@@ -271,19 +277,21 @@ public class ManualRequestView extends AbstractView {
          * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
          */
         public void propertyChange(PropertyChangeEvent evt) {
-            for (int i=0, len=responseFields.length; i<len; i++) {
+            for (int i = 0, len = responseFields.length; i < len; i++) {
                 ValueModel vm = conversationFormModel.getValueModel(responseFields[i]);
-                if (vm.getValue() != null)
+                if (vm.getValue() != null) {
                     vm.setValue(null);
+                }
             }
         }
-
     }
 
     private class FetchCommand extends ActionCommand {
+
         public FetchCommand() {
             super("fetchCommand");
         }
+
         protected void doExecuteCommand() {
             Conversation conversation = getConversation();
             fetchConversation(conversation);
@@ -291,9 +299,11 @@ public class ManualRequestView extends AbstractView {
     }
 
     private class RevertCommand extends ActionCommand {
+
         public RevertCommand() {
             super("revertCommand");
         }
+
         protected void doExecuteCommand() {
             conversationFormModel.revert();
             annotationFormModel.revert();
@@ -308,10 +318,9 @@ public class ManualRequestView extends AbstractView {
     }
 
     private class ManualRequestDialogPage extends FormBackedDialogPage {
+
         private Form requestForm;
-
         private Form responseForm;
-
         private Form annotationForm;
 
         public ManualRequestDialogPage(Form requestForm, Form responseForm,
@@ -324,18 +333,16 @@ public class ManualRequestView extends AbstractView {
 
         @Override
         protected JComponent createControl() {
-            JPanel panel = getComponentFactory()
-                    .createPanel(new BorderLayout());
+            JPanel panel = getComponentFactory().createPanel(new BorderLayout());
             JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
             splitPane.setResizeWeight(0.5);
             JPanel requestPanel = new JPanel(new BorderLayout());
             requestPanel.add(requestForm.getControl(), BorderLayout.CENTER);
-            CommandGroup  transformCommands = getWindowCommandManager().createCommandGroup("transformRequest", 
-            		new Object[] {
-            		TransformRequestCommand.createGetToPost(conversationFormModel),
-            		TransformRequestCommand.createPostToMultipartPost(conversationFormModel),
-            		TransformRequestCommand.createPostToGet(conversationFormModel),
-            });
+            CommandGroup transformCommands = getWindowCommandManager().createCommandGroup("transformRequest",
+                    new Object[]{
+                        TransformRequestCommand.createGetToPost(conversationFormModel),
+                        TransformRequestCommand.createPostToMultipartPost(conversationFormModel),
+                        TransformRequestCommand.createPostToGet(conversationFormModel),});
             requestPanel.add(transformCommands.createButtonBar(), BorderLayout.SOUTH);
             splitPane.setLeftComponent(requestPanel);
             splitPane.setRightComponent(responseForm.getControl());
@@ -345,7 +352,5 @@ public class ManualRequestView extends AbstractView {
             responseForm.getFormModel().validate();
             return panel;
         }
-
     }
-
 }

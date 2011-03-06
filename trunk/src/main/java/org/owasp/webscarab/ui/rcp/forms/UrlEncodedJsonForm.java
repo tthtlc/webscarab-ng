@@ -7,6 +7,8 @@ import java.awt.BorderLayout;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -26,6 +28,8 @@ import org.springframework.richclient.factory.ComponentFactory;
  * 
  */
 public class UrlEncodedJsonForm extends JsonForm {
+    
+    Logger log = Logger.getLogger(this.getClass().getName());
 
     private static String FORM_ID = "urlEncodedJsonForm";
 
@@ -105,7 +109,7 @@ public class UrlEncodedJsonForm extends JsonForm {
                     }
                 }
             } catch (ArrayIndexOutOfBoundsException aioob) {
-                System.out.println("Content was " + content);
+                log.log(Level.SEVERE,"Content was " + content, aioob );
                 aioob.printStackTrace();
                 // Happens if the content doesn't contain "="
                 // do nothing?

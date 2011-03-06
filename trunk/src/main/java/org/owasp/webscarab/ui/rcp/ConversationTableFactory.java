@@ -30,6 +30,8 @@ import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
+import org.owasp.webscarab.util.TableRowResizer;
+import org.owasp.webscarab.util.swing.renderers.TextAreaRenderer;
 
 /**
  * @author rdawes
@@ -219,15 +221,19 @@ public class ConversationTableFactory extends ApplicationServicesAccessor {
 
     public JTable getConversationTable(SortedList<Conversation> conversationList) {
         JTable table = getComponentFactory().createTable();
+        new TableRowResizer(table);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
         if (table instanceof JXTable) {
             JXTable jx = (JXTable) table;
+            jx.setRowHeightEnabled(true);
             jx.setColumnControlVisible(true);
             jx.setSortable(false);
         }
         table.setModel(new EventTableModel<Conversation>(conversationList, tableFormat));
         new TableComparatorChooser<Conversation>(table, conversationList, true);
         table.setDefaultRenderer(Date.class, new DateRenderer());
+        table.setDefaultRenderer(String.class, new TextAreaRenderer());
         TableColorProvider colorProvider = new AnnotationColorProvider(conversationList);
         registerRenderersForTable(table, colorProvider);
         return table;
@@ -286,7 +292,7 @@ public class ConversationTableFactory extends ApplicationServicesAccessor {
             Conversation conversation = conversations.get(row);
 
             if (getConversationService().getAnnotation(conversation.getId()) != null) {
-                return Color.PINK.darker();
+                return Color.YELLOW.brighter();
             } else {
                 return table.getBackground();
             }

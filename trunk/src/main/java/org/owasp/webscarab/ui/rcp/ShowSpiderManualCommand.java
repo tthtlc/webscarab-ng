@@ -228,19 +228,16 @@ public class ShowSpiderManualCommand extends ApplicationWindowAwareCommand {
             return new URIConstraint();
         }
         class URIConstraint implements Constraint {
-            //TODO: check it
             public boolean test(Object o) {
                 try {
                     URI uri = new URI(o.toString());
                     if (!uri.isAbsolute()) {
                         return false;
                     }
-                    HttpURLConnection con = (HttpURLConnection) uri.toURL().openConnection();
                     return true;
-                } catch (IOException ex) {
                 } catch (URISyntaxException ex) {
+                    return false;
                 }
-                return false;
             }
 
         }

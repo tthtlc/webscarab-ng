@@ -128,7 +128,6 @@ public class Spider extends ApplicationServicesAccessor implements ApplicationCo
         }
         return uris;
     }
-    //TODO
 
     public String getUriHash(URI uri) {
         return uri.toASCIIString();
@@ -262,11 +261,6 @@ public class Spider extends ApplicationServicesAccessor implements ApplicationCo
             spiderConfig = (SpiderConfig) applicationContext.getBean("spiderConfig");
             if (event.getType() == SessionEvent.SESSION_CHANGED) {
                 setSession(event.getSession());
-                /*try {
-                startListeners();
-                } catch (IOException ioe) {
-                System.out.println("Error starting listeners " + ioe);
-                }*/
             }
             /*
              * Checking for event about URL and working only if spider
