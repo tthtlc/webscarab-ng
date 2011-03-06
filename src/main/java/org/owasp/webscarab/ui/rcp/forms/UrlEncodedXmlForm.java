@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -28,6 +30,7 @@ import org.springframework.richclient.factory.ComponentFactory;
  * 
  */
 public class UrlEncodedXmlForm extends XmlForm {
+    Logger log = Logger.getLogger(this.getClass().getName());
 
     private static String xmlFieldName = "";
 
@@ -121,7 +124,7 @@ public class UrlEncodedXmlForm extends XmlForm {
                         }
                     }
                 } catch (ArrayIndexOutOfBoundsException aioob) {
-                    System.out.println("Content was " + content);
+                    log.log(Level.SEVERE, "Content was " + content, aioob);
                     aioob.printStackTrace();
                     // Happens if the content doesn't contain "="
                     // do nothing?

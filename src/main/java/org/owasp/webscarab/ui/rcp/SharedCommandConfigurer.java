@@ -5,6 +5,8 @@ package org.owasp.webscarab.ui.rcp;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.richclient.application.ApplicationServicesLocator;
@@ -17,6 +19,7 @@ import org.springframework.util.Assert;
  *
  */
 public class SharedCommandConfigurer implements InitializingBean {
+    Logger log = Logger.getLogger(this.getClass().getName());
 
     private CommandConfigurer commandConfigurer;
 
@@ -41,7 +44,7 @@ public class SharedCommandConfigurer implements InitializingBean {
      * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
      */
     public void afterPropertiesSet() throws Exception {
-        System.out.println("Creating SharedCommandConfigurer");
+        log.log(Level.INFO,"Creating SharedCommandConfigurer");
         if (commandConfigurer == null) {
             commandConfigurer = (CommandConfigurer) ApplicationServicesLocator.services().getService(CommandConfigurer.class);
         }

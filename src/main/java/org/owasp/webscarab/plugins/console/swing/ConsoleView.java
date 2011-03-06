@@ -51,6 +51,7 @@ import org.owasp.webscarab.domain.SessionEvent;
 import org.owasp.webscarab.plugins.console.LogEvent;
 import org.owasp.webscarab.plugins.console.LogHandler;
 import org.owasp.webscarab.plugins.console.WebScarabLogRecord;
+import org.owasp.webscarab.util.TableRowResizer;
 
 /**
  * @author lpz
@@ -189,7 +190,7 @@ public class ConsoleView extends AbstractView implements EventSubscriber, Action
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == saveBtn) {
             fc.addChoosableFileFilter(new LogFileFilter());
-            int returnVal = fc.showSaveDialog(saveBtn); 
+            int returnVal = fc.showSaveDialog(saveBtn);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 try {

@@ -28,8 +28,11 @@ import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
 import java.util.logging.Level;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import org.owasp.webscarab.plugins.console.WebScarabLogRecord;
+import org.owasp.webscarab.util.TableRowResizer;
+import org.owasp.webscarab.util.swing.renderers.TextAreaRenderer;
 
 /**
  * @author lpz
@@ -73,7 +76,7 @@ public class ConsoleTableFactory extends ApplicationServicesAccessor {
 
             @Override
             public Class<?> getAttributeClass() {
-                
+
                 return String.class;
             }
 
@@ -130,7 +133,7 @@ public class ConsoleTableFactory extends ApplicationServicesAccessor {
         tableFormat.addColumn(new ObjectAttribute<WebScarabLogRecord>() {
 
             public Class<?> getAttributeClass() {
-                return String.class;
+                return Exception.class;
             }
 
             public String getAttributeId() {
@@ -138,8 +141,9 @@ public class ConsoleTableFactory extends ApplicationServicesAccessor {
             }
 
             public Object getValue(WebScarabLogRecord record) {
-                if(record.getThrown()==null)
+                if (record.getThrown() == null) {
                     return record.getMessage();
+                }
                 return record.getThrown().getMessage();
             }
         });
@@ -159,23 +163,29 @@ public class ConsoleTableFactory extends ApplicationServicesAccessor {
 
     public JTable getConsoleTable(SortedList<WebScarabLogRecord> records) {
         JTable table = getComponentFactory().createTable();
+        table.setFillsViewportHeight(true);
+        TableRowResizer trr = new TableRowResizer(table);
+
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
         if (table instanceof JXTable) {
             JXTable jx = (JXTable) table;
+            jx.setRowHeightEnabled(true);
             jx.setColumnControlVisible(true);
             jx.setSortable(false);
         }
         EventTableModel<WebScarabLogRecord> etm = new EventTableModel<WebScarabLogRecord>(records, tableFormat);
         table.setModel(etm);
-       
+
         new TableComparatorChooser<WebScarabLogRecord>(table, records, true);
         table.setDefaultRenderer(Date.class, new DateRenderer());
+        table.setDefaultRenderer(Exception.class,new TextAreaRenderer());
+        table.setDefaultRenderer(String.class,new TextAreaRenderer());
         TableColorProvider colorProvider = new AnnotationColorProvider(records);
         registerRenderersForTable(table, colorProvider);
         int[] colwidth = {20, 40, 60};
         TableColumnModel tcm = table.getColumnModel();
-        for(int i=0; i< colwidth.length; ++i) {
+        for (int i = 0; i < colwidth.length; ++i) {
             tcm.getColumn(i).setPreferredWidth(colwidth[i]);
             tcm.getColumn(i).setWidth(colwidth[i]);
         }

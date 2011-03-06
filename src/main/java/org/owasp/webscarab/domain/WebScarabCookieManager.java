@@ -106,7 +106,7 @@ public class WebScarabCookieManager implements EventSubscriber {
                     ret = cc;
             }
         }
-        return ret.getCookieValue();//TODO: Exception?
+        return ret.getCookieValue();
     }
 
     public void onEvent(EventServiceEvent ese) {
