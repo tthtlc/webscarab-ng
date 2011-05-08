@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.owasp.webscarab.jdbc;
+package org.owasp.webscarab.dao;
 
 import org.owasp.webscarab.domain.NamedValue;
 

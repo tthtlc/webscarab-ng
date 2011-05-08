@@ -34,7 +34,7 @@ import org.owasp.webscarab.plugins.webservices.Wsdl;
 import org.owasp.webscarab.services.ConversationGenerator;
 import org.owasp.webscarab.services.ConversationService;
 import org.owasp.webscarab.services.HttpService;
-import org.owasp.webscarab.ui.rcp.ManualRequestCopyEvent;
+import org.owasp.webscarab.plugins.request.RequestCopyEvent;
 import org.owasp.webscarab.ui.rcp.SwingEventSubscriber;
 import org.owasp.webscarab.ui.rcp.forms.AnnotationForm;
 import org.owasp.webscarab.ui.rcp.forms.ContentTabbedPane;
@@ -89,7 +89,7 @@ public class WebServicesView extends AbstractView {
     
     private Definition definition;
     
-    private GuardedActionCommandExecutor manualRequestExecutor = new ManualRequestExecutor();
+    private GuardedActionCommandExecutor requestMakerExecutor = new RequestExecutor();
 
     private WsdlUriForm wsdlUriForm;
     
@@ -109,7 +109,7 @@ public class WebServicesView extends AbstractView {
      */
     @Override
     protected void registerLocalCommandExecutors(PageComponentContext context) {
-        context.register("manualRequestCommand", manualRequestExecutor);
+        context.register("requestMakerCommand", requestMakerExecutor);
     }
 
     /* (non-Javadoc)
@@ -413,13 +413,13 @@ public class WebServicesView extends AbstractView {
 
     }
 
-    private class ManualRequestExecutor extends AbstractActionCommandExecutor {
-        public ManualRequestExecutor() {
+    private class RequestExecutor extends AbstractActionCommandExecutor {
+        public RequestExecutor() {
             setEnabled(true);
         }
         public void execute() {
-            getContext().getPage().showView("manualRequestView");
-            ManualRequestCopyEvent mrce = new ManualRequestCopyEvent(
+            getContext().getPage().showView("requestMakerView");
+            RequestCopyEvent mrce = new RequestCopyEvent(
                     WebServicesView.this, getConversation());
             getEventService().publish(mrce);
         }

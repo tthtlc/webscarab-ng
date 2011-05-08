@@ -27,8 +27,6 @@ import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -121,10 +119,6 @@ public class SpiderView extends AbstractView implements SpiderPopupAdapter{
             eventService.subscribeStrongly(URIFoundEvent.class, this.spiderViewListener);
             eventService.subscribeStrongly(SessionEvent.class, this.spiderViewListener);
         }
-    }
-
-    public void setSpider(Spider spider) {
-        this.spider = spider;
     }
 
     public URI[] getSelectedURIs() {
@@ -250,6 +244,7 @@ public class SpiderView extends AbstractView implements SpiderPopupAdapter{
                 }
             } else if (ese instanceof SessionEvent) {
                 //populating uris
+                SpiderView.this.spider = (Spider)getApplicationContext().getBean("spider");
                 for (URI u : spider.getURIs()) {
                     uriTreeModel.add(u);
                 }

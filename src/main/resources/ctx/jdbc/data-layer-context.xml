@@ -47,6 +47,15 @@
 		</property>
 	</bean>
 
+         <bean id="fuzzingVariableDao" class="org.owasp.webscarab.jdbc.JdbcFuzzingVariablesDao"
+		lazy-init="true" singleton="true">
+		<property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+		<property name="properties">
+			<ref local="jdbcProperties"/>
+		</property>
+	</bean>
         
         <bean id="headerConfigurationDao" class="org.owasp.webscarab.jdbc.JdbcHeaderConfigurationDao"
 		lazy-init="true" singleton="true">

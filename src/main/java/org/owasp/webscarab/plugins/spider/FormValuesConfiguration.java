@@ -7,7 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 /**
- * @author rdawes
+ * @author lpz
  * 
  */
 public class FormValuesConfiguration {

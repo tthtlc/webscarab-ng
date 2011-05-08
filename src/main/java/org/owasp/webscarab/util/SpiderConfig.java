@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Properties;
 import org.owasp.webscarab.dao.FormValueConfigurationDao;
 import org.owasp.webscarab.dao.HeaderConfigurationDao;
+import org.owasp.webscarab.domain.BaseEntity;
 import org.owasp.webscarab.domain.FormValueConfiguration;
 import org.owasp.webscarab.domain.HeaderConfiguration;
 import org.owasp.webscarab.domain.NamedValue;
@@ -81,27 +82,57 @@ public final class SpiderConfig implements PropertyConstraintProvider {
     }
 
     public List<FormValueConfiguration> getFormValuesConfigurations() {
-        formValuesConfigurations.clear();
-        for (FormValueConfiguration fvc : formValueConfigurationDao.getAll()) {
-            formValuesConfigurations.add(fvc);
+        synchronized (this) {
+
+            formValuesConfigurations.clear();
+            for (FormValueConfiguration fvc : formValueConfigurationDao.getAll()) {
+                formValuesConfigurations.add(fvc);
+            }
         }
         return formValuesConfigurations;
     }
 
     public void setFormValuesConfigurations(List<FormValueConfiguration> formValuesConfigurations) {
-        this.formValuesConfigurations = formValuesConfigurations;
+        synchronized (this) {
+            //adding new
+            for (FormValueConfiguration fz : formValuesConfigurations) {
+                formValueConfigurationDao.update(fz);
+            }
+            //filtering removed
+            for (FormValueConfiguration fz : this.formValuesConfigurations) {
+                if (fz.isNew() == false && BaseEntity.contains(formValuesConfigurations, fz) == false) {
+                    formValueConfigurationDao.delete(fz.getId());
+                }
+            }
+            this.formValuesConfigurations = formValuesConfigurations;
+        }
     }
 
     public List<HeaderConfiguration> getHeaderConfigurations() {
-        headerConfigurations.clear();
-        for (HeaderConfiguration hc : headerConfigurationDao.getAll()) {
-            headerConfigurations.add(hc);
+        synchronized (this) {
+            headerConfigurations.clear();
+            for (HeaderConfiguration hc : headerConfigurationDao.getAll()) {
+                headerConfigurations.add(hc);
+            }
         }
         return headerConfigurations;
     }
 
     public void setHeaderConfigurations(List<HeaderConfiguration> headerConfigurations) {
-        this.headerConfigurations = headerConfigurations;
+        synchronized (this) {
+            //adding new
+            for (HeaderConfiguration fz : headerConfigurations) {
+                headerConfigurationDao.update(fz);
+            }
+            //filtering removed
+            for (HeaderConfiguration fz : this.headerConfigurations) {
+                if (fz.isNew() == false && BaseEntity.contains(headerConfigurations, fz) == false) {
+                    headerConfigurationDao.delete(fz.getId());
+                }
+            }
+            this.headerConfigurations = headerConfigurations;
+
+        }
     }
 
     public NamedValue getNamedValue(String property) {
@@ -111,7 +142,7 @@ public final class SpiderConfig implements PropertyConstraintProvider {
         if (nv == null) {
             try {
                 Field f = this.getClass().getDeclaredField(property);
-                nv = new NamedValue(name,  f.get(this).toString());
+                nv = new NamedValue(name, f.get(this).toString());
                 namedValueDao.saveNamedValue(nv);
             } catch (Exception e) {
             }
@@ -171,7 +202,7 @@ public final class SpiderConfig implements PropertyConstraintProvider {
     }
 
     public String getFetchPattern() {
-       return getNamedValue(PROPERTY_FETCH_PATTERN).getValue();
+        return getNamedValue(PROPERTY_FETCH_PATTERN).getValue();
     }
 
     public void setFetchPattern(String fetchPattern) {
@@ -185,7 +216,7 @@ public final class SpiderConfig implements PropertyConstraintProvider {
 
     public void setFollowForms(boolean followForms) {
         this.followForms = followForms;
-         setNamedValue(PROPERTY_FOLLOW_FORMS, followForms);
+        setNamedValue(PROPERTY_FOLLOW_FORMS, followForms);
     }
 
     public int getMaxSeconds() {

@@ -137,6 +137,10 @@
 		class="org.owasp.webscarab.plugins.spider.swing.SpiderContextMenu">
 	</bean>
 
+         <bean id="requestContextMenu"
+		class="org.owasp.webscarab.plugins.request.swing.RequestContextMenu">
+	</bean>
+
 	<bean id="applicationDescriptor"
 		class="org.owasp.webscarab.util.ManifestApplicationDescriptor">
 		<constructor-arg index="0">
@@ -272,6 +276,9 @@
 				<entry key="conversationTableFactory">
 					<ref bean="conversationTableFactory" />
 				</entry>
+                                 <entry key="requestContextMenu">
+					<ref bean="requestContextMenu" />
+				</entry>
 			</map>
 		</property>
 		<property name="autoHideEnabled"><value>true</value></property>
@@ -302,9 +309,9 @@
 		<property name="maximizeEnabled"><value>true</value></property>
 	</bean>
 
-	<bean id="manualRequestView"
+	<bean id="requestMakerView"
 		class="org.springframework.richclient.application.docking.vldocking.VLDockingViewDescriptor">
-		<property name="viewClass"><value>org.owasp.webscarab.ui.rcp.ManualRequestView</value></property>
+		<property name="viewClass"><value>org.owasp.webscarab.plugins.request.swing.RequestMakerView</value></property>
 		<property name="viewProperties">
 			<map>
 				<entry key="eventService">
@@ -353,9 +360,6 @@
 		<property name="viewClass"><value>org.owasp.webscarab.plugins.spider.swing.SpiderView</value></property>
 		<property name="viewProperties">
 			<map>
-				<entry key="spider">
-					<ref bean="spider" />
-				</entry>
 				<entry key="eventService">
 					<ref bean="eventService" />
 				</entry>
@@ -414,15 +418,17 @@
 
         <bean id="spider" class="org.owasp.webscarab.plugins.spider.Spider" lazy-init="true" singleton="true">
             <property name="eventService" ref="eventService"/>
-            <property name="cookieManager" ref="webscarabCookieManager"/>
-            <property name="conversationService" ref="conversationService"/>
             <property name="proxy" ref="proxy"/>
-            <property name="uriDao" ref="uriDao"/>
         </bean>
 
         <bean id="spiderConfig" class="org.owasp.webscarab.util.SpiderConfig" lazy-init="true" singleton="true">
             <property name="headerConfigurationDao" ref="headerConfigurationDao"/>
             <property name="formValueConfigurationDao" ref="formValueConfigurationDao"/>
+            <property name="namedValueDao" ref="namedValueDao"/>
+        </bean>
+
+        <bean id="fuzzingModel" class="org.owasp.webscarab.plugins.request.FuzzingModel" lazy-init="true" singleton="true">
+            <property name="fuzzingVariableDao" ref="fuzzingVariableDao"/>
             <property name="namedValueDao" ref="namedValueDao"/>
         </bean>
 

@@ -3,6 +3,7 @@
  */
 package org.owasp.webscarab.ui.rcp;
 
+import org.owasp.webscarab.plugins.request.RequestCopyEvent;
 import java.awt.BorderLayout;
 
 import javax.swing.JComponent;
@@ -50,7 +51,7 @@ public class ConversationView extends AbstractView {
 
     private Listener listener = new Listener();
 
-    private GuardedActionCommandExecutor manualRequestExecutor = new ManualRequestExecutor();
+    private GuardedActionCommandExecutor requestMakerExecutor = new RequestExecutor();
 
     private Conversation conversation;
 
@@ -61,7 +62,7 @@ public class ConversationView extends AbstractView {
      */
     @Override
     protected void registerLocalCommandExecutors(PageComponentContext context) {
-        context.register("manualRequestCommand", manualRequestExecutor);
+        context.register("requestMakerCommand", requestMakerExecutor);
     }
 
 	/*
@@ -102,7 +103,7 @@ public class ConversationView extends AbstractView {
     public void setConversation(Conversation conversation) {
         this.conversation = conversation;
         updateSelection(conversation);
-        manualRequestExecutor.setEnabled(conversation != null);
+        requestMakerExecutor.setEnabled(conversation != null);
     }
 
 	private void updateSelection(Conversation conversation) {
@@ -185,12 +186,12 @@ public class ConversationView extends AbstractView {
 
     }
 
-    private class ManualRequestExecutor extends AbstractActionCommandExecutor {
+    private class RequestExecutor extends AbstractActionCommandExecutor {
         public void execute() {
-            getContext().getPage().showView("manualRequestView");
+            getContext().getPage().showView("requestMakerView");
             // This is guarded by a SingleSelection guard, so there will always be a single
             // conversation selected when this is invoked
-            ManualRequestCopyEvent mrce = new ManualRequestCopyEvent(
+            RequestCopyEvent mrce = new RequestCopyEvent(
                     ConversationView.this, getConversation());
             getEventService().publish(mrce);
         }

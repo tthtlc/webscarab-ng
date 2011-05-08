@@ -4,13 +4,10 @@
  */
 package org.owasp.webscarab.domain;
 
-import java.net.CookieManager;
-import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 import org.bushe.swing.event.EventService;
@@ -29,7 +26,7 @@ public class WebScarabCookieManager implements EventSubscriber {
     private Logger logger = Logger.getLogger(getClass().getName());
     private EventService eventService;
     //private CookieStore cookieStore;
-    private Collection<CookieConfiguration> cookieConfigurations;
+    private List<CookieConfiguration> cookieConfigurations = new ArrayList<CookieConfiguration>();
 
     public WebScarabCookieManager() {
         logger.info("Starting webscarab cookie manager");
@@ -43,30 +40,38 @@ public class WebScarabCookieManager implements EventSubscriber {
         this.cookiesDao = cookiesDao;
     }
     
-    public Collection<CookieConfiguration> getCookieConfigurations() {
+    public List<CookieConfiguration> getCookieConfigurations() {
         synchronized(this) {
-            cookieConfigurations = cookiesDao.getAll();
+            cookieConfigurations.clear();
+            for(CookieConfiguration cc: cookiesDao.getAll())
+                cookieConfigurations.add(cc);
         }
         return cookieConfigurations;
     }
-    public void setCookieConfigurations(Collection<CookieConfiguration> newCookies) {
+    public void setCookieConfigurations(List<CookieConfiguration> newCookies) {
         synchronized(this) {
             Collection<CookieConfiguration> oldCookies = cookiesDao.getAll();
             for(CookieConfiguration nc: newCookies) {
                 cookiesDao.update(nc);
             }
              for(CookieConfiguration oc: oldCookies) {
-                if(!cookiesContains(newCookies, oc))
+                if(!BaseEntity.contains(newCookies, oc))
                     cookiesDao.delete(oc.getId());
             }
         }
         this.cookieConfigurations = newCookies;
     }
     public boolean cookiesContains(Collection<CookieConfiguration> cookies, CookieConfiguration cookie){
-        for(CookieConfiguration cc: cookies)
-            if(cookie.getId()!=null && cc.getId()==cookie.getId())
-                return true;
-        return false;
+        boolean foundVar = false;
+        for (int i=0; i < cookies.size(); ++i) {
+            int vid = cookie.getId();
+            int nid = ((CookieConfiguration)cookies.toArray()[i]).getId();
+            if (nid==vid) {
+                foundVar = true;
+                break;
+            }
+        }
+        return foundVar;
     }
     public int getCookieCount() {
         return cookiesDao.getAll().size();
