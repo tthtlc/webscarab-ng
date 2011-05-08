@@ -69,18 +69,10 @@ public class ConsoleView extends AbstractView implements EventSubscriber, Action
     private EventService eventService;
     private ConsoleTableFactory consoleTableFactory = new ConsoleTableFactory();
     private EventSelectionModel<WebScarabLogRecord> consoleSelectionModel;
-    private GuardedActionCommandExecutor manualRequestExecutor = new ManualRequestExecutor();
 
 
     /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.richclient.application.support.AbstractView#registerLocalCommandExecutors(org.springframework.richclient.application.PageComponentContext)
-     */
-    @Override
-    protected void registerLocalCommandExecutors(PageComponentContext context) {
-        context.register("manualRequestCommand", manualRequestExecutor);
-    }
+
 
     /*
      * (non-Javadoc)
@@ -134,7 +126,6 @@ public class ConsoleView extends AbstractView implements EventSubscriber, Action
                     }
                 });
         ValueModel selectionHolder = new ListSelectionValueModelAdapter(table.getSelectionModel());
-        new ListSingleSelectionGuard(selectionHolder, manualRequestExecutor);
         JScrollPane tableScrollPane = getComponentFactory().createScrollPane(
                 table);
         tableScrollPane.setMinimumSize(new Dimension(100, 60));
@@ -223,18 +214,6 @@ public class ConsoleView extends AbstractView implements EventSubscriber, Action
             list.add(record.getSourceClassName());
             list.add(record.getSourceMethodName());
             list.add(record.getLoggerName());
-        }
-    }
-
-    private class ManualRequestExecutor extends AbstractActionCommandExecutor {
-
-        public void execute() {
-            getContext().getPage().showView("manualRequestView");
-            // This is guarded by a SingleSelection guard, so there will always be a single
-            // conversation selected when this is invoked
-            //ManualRequestCopyEvent mrce = new ManualRequestCopyEvent(
-            //        ConsoleView.this, getSelectedWebScarabLogRecords()[0]);
-            //getEventService().publish(mrce);
         }
     }
 

@@ -7,7 +7,7 @@
 		class="org.springframework.richclient.application.support.ApplicationWindowCommandManager">
         <property name="sharedCommandIds">
             <list>
-                <value>manualRequestCommand</value>
+                <value>requestMakerCommand</value>
 				<!--value>undoCommand</value>
 				<value>redoCommand</value>
 				<value>cutCommand</value>
@@ -54,7 +54,7 @@
     </bean>
     <bean id="showCookieManagerCommand"
 		class="org.owasp.webscarab.ui.rcp.ShowCookieManagerCommand" singleton="true">
-                <property name="cookieManager" ref="webscarabCookieManager"/>
+                <!-- TODO:!<property name="cookieManager" ref="webscarabCookieManager"/>-->
    </bean>
    <bean id="showConsoleToggleCommand"
 		class="org.springframework.richclient.command.support.ShowViewCommand" singleton="true">
@@ -69,7 +69,7 @@
         <property name="members">
             <list>
                 <ref bean="showProxyControlBarToggleCommand"/>
-                <value>manualRequestCommand</value>
+                <value>requestMakerCommand</value>
                 <ref bean="showTranscoderCommand"/>
                 <ref bean="showCookieManagerCommand"/>
                 <ref bean="showConsoleToggleCommand"/>

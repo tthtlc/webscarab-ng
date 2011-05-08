@@ -51,162 +51,157 @@ import org.springframework.richclient.form.FormModelHelper;
  */
 public class SelectDatabaseCommand extends ApplicationWindowAwareCommand {
 
-	private static final String ID = "selectDatabaseCommand";
+    private static final String ID = "selectDatabaseCommand";
+    private boolean closeOnCancel = true;
+    private ApplicationDialog dialog = null;
+    private DataSourceFactory dataSourceFactory = null;
+    private EventService eventService = null;
 
-	private boolean closeOnCancel = true;
+    /**
+     * Constructor.
+     */
+    public SelectDatabaseCommand() {
+        super(ID);
+    }
 
-	private ApplicationDialog dialog = null;
-
-	private DataSourceFactory dataSourceFactory = null;
-
-	private EventService eventService = null;
-
-	/**
-	 * Constructor.
-	 */
-	public SelectDatabaseCommand() {
-		super(ID);
-	}
-
-	/**
-	 * Execute the login command. Display the dialog and attempt authentication.
-	 */
+    /**
+     * Execute the login command. Display the dialog and attempt authentication.
+     */
     protected void doExecuteCommand() {
-		CompositeDialogPage tabbedPage = new TabbedDialogPage(
-				"selectDatabaseForm");
+        CompositeDialogPage tabbedPage = new TabbedDialogPage(
+                "selectDatabaseForm");
 
-		final JdbcDetailsForm jdbcDetailsForm = createJdbcDetailsForm();
+        final JdbcDetailsForm jdbcDetailsForm = createJdbcDetailsForm();
 
-		tabbedPage.addForm(jdbcDetailsForm);
+        tabbedPage.addForm(jdbcDetailsForm);
 
-		dialog = new TitledPageApplicationDialog(tabbedPage) {
-			protected boolean onFinish() {
-				jdbcDetailsForm.commit();
+        dialog = new TitledPageApplicationDialog(tabbedPage) {
 
-				JdbcConnectionDetails jdbcDetails = (JdbcConnectionDetails) jdbcDetailsForm
-						.getFormObject();
+            protected boolean onFinish() {
+                jdbcDetailsForm.commit();
 
-				try {
+                JdbcConnectionDetails jdbcDetails = (JdbcConnectionDetails) jdbcDetailsForm.getFormObject();
+
+                try {
                     // do an initial test creation of the datasource
                     getDataSourceFactory().createDataSource(jdbcDetails, true);
                     getDataSourceFactory().setJdbcConnectionDetails(jdbcDetails);
-					postSelection();
-				} catch (Exception e) {
-					logger.error("Error opening connection", e);
-					// Any exception here means that the connection failed
-					// Report it and return false
-					boolean rtn = handleConnectionFailure(e);
-					jdbcDetailsForm.requestFocusInWindow();
-					return rtn;
-				}
-				return true;
-			}
+                    postSelection();
+                } catch (Exception e) {
+                    logger.error("Error opening connection", e);
+                    // Any exception here means that the connection failed
+                    // Report it and return false
+                    boolean rtn = handleConnectionFailure(e);
+                    jdbcDetailsForm.requestFocusInWindow();
+                    return rtn;
+                }
+                return true;
+            }
 
-			protected void onCancel() {
-				super.onCancel(); // Close the dialog
+            protected void onCancel() {
+                super.onCancel(); // Close the dialog
 
-				// Now exit if configured
-				if (isCloseOnCancel()) {
-					logger
-							.info("User canceled selection; close the application.");
-					getApplication().close();
-				}
-			}
+                // Now exit if configured
+                if (isCloseOnCancel()) {
+                    logger.info("User canceled selection; close the application.");
+                    getApplication().close();
+                }
+            }
 
-			protected void onAboutToShow() {
-				jdbcDetailsForm.requestFocusInWindow();
-			}
-		};
-		dialog.setCallingCommand(this);
-		dialog.showDialog();
-	}
+            protected void onAboutToShow() {
+                jdbcDetailsForm.requestFocusInWindow();
+            }
+        };
+        dialog.setCallingCommand(this);
+        dialog.showDialog();
+    }
 
-	/**
-	 * Construct the Form to place in the dialog.
-	 *
-	 * @return form to use
-	 */
-	protected JdbcDetailsForm createJdbcDetailsForm() {
-		JdbcConnectionDetails jcd = getDataSourceFactory().getJdbcConnectionDetails();
-        if (jcd == null)
+    /**
+     * Construct the Form to place in the dialog.
+     *
+     * @return form to use
+     */
+    protected JdbcDetailsForm createJdbcDetailsForm() {
+        JdbcConnectionDetails jcd = getDataSourceFactory().getJdbcConnectionDetails();
+        if (jcd == null) {
             jcd = new JdbcConnectionDetails();
-		ValidatingFormModel model = FormModelHelper.createFormModel(jcd, true);
-		return new JdbcDetailsForm(model);
-	}
+        }
+        ValidatingFormModel model = FormModelHelper.createFormModel(jcd, true);
+        return new JdbcDetailsForm(model);
+    }
 
-	/**
-	 * Get the dialog in use, if available.
-	 *
-	 * @return dialog instance in use
-	 */
-	protected ApplicationDialog getDialog() {
-		return dialog;
-	}
+    /**
+     * Get the dialog in use, if available.
+     *
+     * @return dialog instance in use
+     */
+    protected ApplicationDialog getDialog() {
+        return dialog;
+    }
 
-	/**
-	 * Called to give subclasses control after a successful selection.
-	 */
-	protected void postSelection() {
-		if (getEventService() != null) {
+    /**
+     * Called to give subclasses control after a successful selection.
+     */
+    protected void postSelection() {
+        if (getEventService() != null) {
             Session session = new Session();
             session.setId(0);
-			eventService.publish(new SessionEvent(this, session));
+            eventService.publish(new SessionEvent(this, session));
         }
-	}
+    }
 
-	/**
-	 * Report a login failure. Base implementation just displays a message
-	 * dialog with the localized message from the security exception.
-	 *
-	 * @param authentication
-	 *            token that failed to authenticate
-	 * @param exception
-	 *            The exception indicating the authentication failure
-	 * @return true if the login dialog should be closed, base implementation
-	 *         always returns false
-	 */
-	protected boolean handleConnectionFailure(Exception exception) {
-		String exceptionMessage = exception.getLocalizedMessage();
-		JOptionPane.showMessageDialog(getDialog().getDialog(),
-				exceptionMessage, Application.instance().getName(),
-				JOptionPane.ERROR_MESSAGE);
+    /**
+     * Report a login failure. Base implementation just displays a message
+     * dialog with the localized message from the security exception.
+     *
+     * @param authentication
+     *            token that failed to authenticate
+     * @param exception
+     *            The exception indicating the authentication failure
+     * @return true if the login dialog should be closed, base implementation
+     *         always returns false
+     */
+    protected boolean handleConnectionFailure(Exception exception) {
+        String exceptionMessage = exception.getLocalizedMessage();
+        JOptionPane.showMessageDialog(getDialog().getDialog(),
+                exceptionMessage, Application.instance().getName(),
+                JOptionPane.ERROR_MESSAGE);
 
-		return false;
-	}
+        return false;
+    }
 
-	/**
-	 * Get the "close on cancel" setting.
-	 *
-	 * @return close on cancel
-	 */
-	public boolean isCloseOnCancel() {
-		return closeOnCancel;
-	}
+    /**
+     * Get the "close on cancel" setting.
+     *
+     * @return close on cancel
+     */
+    public boolean isCloseOnCancel() {
+        return closeOnCancel;
+    }
 
-	/**
-	 * Indicates if the application should be closed if the user cancels the
-	 * selection operation. Default is true.
-	 *
-	 * @param closeOnCancel
-	 */
-	public void setCloseOnCancel(boolean closeOnCancel) {
-		this.closeOnCancel = closeOnCancel;
-	}
+    /**
+     * Indicates if the application should be closed if the user cancels the
+     * selection operation. Default is true.
+     *
+     * @param closeOnCancel
+     */
+    public void setCloseOnCancel(boolean closeOnCancel) {
+        this.closeOnCancel = closeOnCancel;
+    }
 
-	public DataSourceFactory getDataSourceFactory() {
-		return this.dataSourceFactory;
-	}
+    public DataSourceFactory getDataSourceFactory() {
+        return this.dataSourceFactory;
+    }
 
-	public void setDataSourceFactory(DataSourceFactory dataSourceFactory) {
-		this.dataSourceFactory = dataSourceFactory;
-	}
+    public void setDataSourceFactory(DataSourceFactory dataSourceFactory) {
+        this.dataSourceFactory = dataSourceFactory;
+    }
 
-	public EventService getEventService() {
-		return this.eventService;
-	}
+    public EventService getEventService() {
+        return this.eventService;
+    }
 
-	public void setEventService(EventService eventService) {
-		this.eventService = eventService;
-	}
-
+    public void setEventService(EventService eventService) {
+        this.eventService = eventService;
+    }
 }

@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.owasp.webscarab.ui.rcp;
+package org.owasp.webscarab.plugins.request;
 
 import org.bushe.swing.event.EventServiceEvent;
 import org.owasp.webscarab.domain.Conversation;
@@ -10,13 +10,13 @@ import org.owasp.webscarab.domain.Conversation;
  * @author rdawes
  *
  */
-public class ManualRequestCopyEvent implements EventServiceEvent {
+public class RequestCopyEvent implements EventServiceEvent {
 
     private Object source;
 
     private Conversation conversation;
 
-    public ManualRequestCopyEvent(Object source, Conversation conversation) {
+    public RequestCopyEvent(Object source, Conversation conversation) {
         this.source = source;
         this.conversation = conversation;
     }

@@ -3,6 +3,7 @@
  */
 package org.owasp.webscarab.jdbc;
 
+import org.owasp.webscarab.dao.HeadersDao;
 import java.lang.ref.WeakReference;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,7 +19,7 @@ import org.springframework.jdbc.object.MappingSqlQuery;
 import org.springframework.jdbc.object.SqlUpdate;
 
 /**
- * @author rdawes
+ * @author Lpz
  *
  */
 public class JdbcHeadersDao extends

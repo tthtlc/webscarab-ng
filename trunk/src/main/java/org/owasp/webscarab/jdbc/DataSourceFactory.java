@@ -39,6 +39,7 @@ public class DataSourceFactory implements FactoryBean, DisposableBean {
 	}
 
     public DataSource createDataSource(JdbcConnectionDetails jdbcConnectionDetails, boolean test) throws SQLException {
+        this.jdbcConnectionDetails = jdbcConnectionDetails;
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(jdbcConnectionDetails.getDriverClassName());
         dataSource.setUrl(jdbcConnectionDetails.getUrl());
@@ -54,6 +55,7 @@ public class DataSourceFactory implements FactoryBean, DisposableBean {
             }
             return null;
         }
+        this.dataSource = dataSource;
         return dataSource;
     }
 

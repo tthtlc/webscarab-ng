@@ -3,6 +3,7 @@
  */
 package org.owasp.webscarab.ui.rcp;
 
+import org.owasp.webscarab.plugins.request.RequestCopyEvent;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -21,6 +22,7 @@ import org.bushe.swing.event.EventService;
 import org.bushe.swing.event.EventServiceEvent;
 import org.owasp.webscarab.domain.Annotation;
 import org.owasp.webscarab.domain.Conversation;
+import org.owasp.webscarab.plugins.request.swing.RequestContextMenu;
 import org.owasp.webscarab.services.ConversationService;
 import org.springframework.binding.value.ValueModel;
 import org.springframework.richclient.application.PageComponent;
@@ -40,24 +42,23 @@ import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+import org.owasp.webscarab.plugins.request.swing.RequestPopupAdapter;
+import org.owasp.webscarab.plugins.request.swing.RequestPopupListener;
 
 /**
  * @author rdawes
  *
  */
-public class ConversationListView extends AbstractView {
+public class ConversationListView extends AbstractView implements RequestPopupAdapter {
 
     private EventList<Conversation> conversationList;
-
     private ConversationService conversationService;
-
     private EventService eventService;
-
     private ConversationTableFactory conversationTableFactory;
-
     private EventSelectionModel<Conversation> conversationSelectionModel;
-
-    private GuardedActionCommandExecutor manualRequestExecutor = new ManualRequestExecutor();
+    private RequestContextMenu requestContextMenu;
+    private RequestPopupListener requestPopupListener = new RequestPopupListener(this);
+    private GuardedActionCommandExecutor requestMakerExecutor = new RequestExecutor();
 
     /*
      * (non-Javadoc)
@@ -66,7 +67,7 @@ public class ConversationListView extends AbstractView {
      */
     @Override
     protected void registerLocalCommandExecutors(PageComponentContext context) {
-        context.register("manualRequestCommand", manualRequestExecutor);
+        context.register("requestMakerCommand", requestMakerExecutor);
     }
 
     /*
@@ -102,35 +103,35 @@ public class ConversationListView extends AbstractView {
         table.setSelectionModel(conversationSelectionModel);
         table.getSelectionModel().addListSelectionListener(
                 new ListSelectionListener() {
+
                     public void valueChanged(ListSelectionEvent e) {
-                        if (e.getValueIsAdjusting())
+                        if (e.getValueIsAdjusting()) {
                             return;
-                        EventList<Conversation> selected = conversationSelectionModel
-                                .getSelected();
-                        Conversation[] selection = selected
-                                .toArray(new Conversation[selected.size()]);
+                        }
+                        EventList<Conversation> selected = conversationSelectionModel.getSelected();
+                        Conversation[] selection = selected.toArray(new Conversation[selected.size()]);
                         ConversationSelectionEvent cse = new ConversationSelectionEvent(
                                 ConversationListView.this, selection);
                         eventService.publish(cse);
                     }
                 });
-        ValueModel selectionHolder = new ListSelectionValueModelAdapter(table
-                .getSelectionModel());
-        new ListSingleSelectionGuard(selectionHolder, manualRequestExecutor);
+        ValueModel selectionHolder = new ListSelectionValueModelAdapter(table.getSelectionModel());
+        new ListSingleSelectionGuard(selectionHolder, requestMakerExecutor);
         JScrollPane tableScrollPane = getComponentFactory().createScrollPane(
                 table);
         tableScrollPane.setMinimumSize(new Dimension(100, 60));
 
-        JPanel mainPanel = getComponentFactory()
-                .createPanel(new BorderLayout());
+        JPanel mainPanel = getComponentFactory().createPanel(new BorderLayout());
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         mainPanel.add(filterPanel, BorderLayout.SOUTH);
+        table.addMouseListener(requestPopupListener);
+        this.requestContextMenu.setPageComponentContext(this.getContext());
+
         return mainPanel;
     }
 
     public Conversation[] getSelectedConversations() {
-        EventList<Conversation> selected = conversationSelectionModel
-                .getSelected();
+        EventList<Conversation> selected = conversationSelectionModel.getSelected();
         return selected.toArray(new Conversation[selected.size()]);
     }
 
@@ -146,9 +147,9 @@ public class ConversationListView extends AbstractView {
      * @return Returns the conversationService.
      */
     private ConversationService getConversationService() {
-        if (conversationService == null)
-            conversationService = (ConversationService) getApplicationContext()
-                    .getBean("conversationService");
+        if (conversationService == null) {
+            conversationService = (ConversationService) getApplicationContext().getBean("conversationService");
+        }
         return conversationService;
     }
 
@@ -173,6 +174,23 @@ public class ConversationListView extends AbstractView {
         this.conversationTableFactory = conversationTableFactory;
     }
 
+    public RequestContextMenu getRequestContextMenu() {
+        return requestContextMenu;
+    }
+
+    public Conversation getConversation() {
+        return this.getSelectedConversations()[0];
+    }
+
+    public void setRequestContextMenu(RequestContextMenu requestContextMenu) {
+        this.requestContextMenu = requestContextMenu;
+        this.requestContextMenu.setEventService(this.eventService);
+    }
+
+    public boolean hasSelectedConversations() {
+        return getSelectedConversations().length > 0;
+    }
+
     private class ConversationFilter implements TextFilterator<Conversation> {
 
         public void getFilterStrings(List<String> list,
@@ -184,33 +202,36 @@ public class ConversationListView extends AbstractView {
             list.add(conversation.getSource());
             Annotation annotation = getConversationService().getAnnotation(
                     conversation.getId());
-            if (annotation != null && !"".equals(annotation.getAnnotation()))
+            if (annotation != null && !"".equals(annotation.getAnnotation())) {
                 list.add(annotation.getAnnotation());
+            }
         }
-
     }
 
     private class UriMatcher extends AbstractMatcherEditor<Conversation> {
 
         private Matcher<Conversation> matcher;
-
         private URI[] selection = new URI[0];
 
         public UriMatcher() {
             matcher = new Matcher<Conversation>() {
+
                 public boolean matches(Conversation conversation) {
-                    if (selection.length == 0)
+                    if (selection.length == 0) {
                         return true;
+                    }
                     for (int i = 0; i < selection.length; i++) {
                         if (conversation.getRequestUri().toString().startsWith(
-                                selection[i].toString()))
+                                selection[i].toString())) {
                             return true;
+                        }
                     }
                     return false;
                 }
             };
             getEventService().subscribeStrongly(URISelectionEvent.class,
                     new SwingEventSubscriber() {
+
                         protected void handleEventOnEDT(EventServiceEvent evt) {
                             if (evt instanceof URISelectionEvent) {
                                 URISelectionEvent use = (URISelectionEvent) evt;
@@ -220,17 +241,17 @@ public class ConversationListView extends AbstractView {
                                     if (pc.getContext().getPage().equals(
                                             getContext().getPage())) {
                                         selection = use.getSelection();
-                                        for (int i = 0; i < selection.length; i++)
+                                        for (int i = 0; i < selection.length; i++) {
                                             if (selection.length == 0) {
                                                 fireMatchNone();
                                             } else {
                                                 fireChanged(matcher);
                                             }
+                                        }
                                     }
                                 }
                             }
                         }
-
                     });
         }
 
@@ -243,15 +264,15 @@ public class ConversationListView extends AbstractView {
         public Matcher<Conversation> getMatcher() {
             return matcher;
         }
-
     }
 
-    private class ManualRequestExecutor extends AbstractActionCommandExecutor {
+    private class RequestExecutor extends AbstractActionCommandExecutor {
+
         public void execute() {
-            getContext().getPage().showView("manualRequestView");
+            getContext().getPage().showView("requestMakerView");
             // This is guarded by a SingleSelection guard, so there will always be a single
             // conversation selected when this is invoked
-            ManualRequestCopyEvent mrce = new ManualRequestCopyEvent(
+            RequestCopyEvent mrce = new RequestCopyEvent(
                     ConversationListView.this, getSelectedConversations()[0]);
             getEventService().publish(mrce);
         }

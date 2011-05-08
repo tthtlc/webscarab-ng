@@ -3,6 +3,7 @@
  */
 package org.owasp.webscarab.jdbc;
 
+import org.owasp.webscarab.dao.HeadersDao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;

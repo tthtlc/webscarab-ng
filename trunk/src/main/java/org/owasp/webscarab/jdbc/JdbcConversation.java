@@ -3,6 +3,7 @@
  */
 package org.owasp.webscarab.jdbc;
 
+import org.owasp.webscarab.dao.HeadersDao;
 import java.lang.ref.WeakReference;
 
 import org.owasp.webscarab.dao.BlobDao;

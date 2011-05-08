@@ -3,24 +3,17 @@
  */
 package org.owasp.webscarab.ui.rcp;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.util.Enumeration;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.plaf.BorderUIResource.LineBorderUIResource;
-import org.apache.commons.logging.Log;
 
 import org.bushe.swing.event.EventService;
 import org.owasp.webscarab.WebScarab;
 import org.owasp.webscarab.domain.Session;
 import org.owasp.webscarab.domain.SessionEvent;
 import org.owasp.webscarab.jdbc.DataSourceFactory;
-import org.owasp.webscarab.plugins.console.LogHandler;
 import org.owasp.webscarab.util.JdbcConnectionDetails;
 import org.owasp.webscarab.util.rcp.ScreenAwareWindowMemento;
 import org.springframework.richclient.application.ApplicationWindow;
@@ -89,7 +82,7 @@ public class WebScarabLifecycleAdvisor extends DefaultApplicationLifecycleAdviso
                 JdbcConnectionDetails jdbc = new JdbcConnectionDetails();
                 jdbc.setDriverClassName("org.hsqldb.jdbcDriver");
                 jdbc.setUrl("jdbc:hsqldb:file:" + WebScarab.args[0]);
-                jdbc.setUsername("sa");
+                jdbc.setUsername("owasp_user");
                 jdbc.setPassword(null);
 
                 try {

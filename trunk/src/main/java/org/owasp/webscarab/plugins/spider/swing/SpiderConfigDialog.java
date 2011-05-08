@@ -41,7 +41,7 @@ public class SpiderConfigDialog {
             }
         };
         spider = s;
-        hfm = FormModelHelper.createCompoundFormModel(spiderConfig);
+        hfm = FormModelHelper.createFormModel(spiderConfig);
         main = new SpiderConfigMainForm(hfm);
         header = new SpiderConfigHeaderForm(hfm);
         values = new SpiderConfigValuesForm(hfm);

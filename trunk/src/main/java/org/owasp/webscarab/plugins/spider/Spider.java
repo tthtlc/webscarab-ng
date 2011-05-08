@@ -51,6 +51,7 @@ import org.owasp.webscarab.domain.SessionEvent;
 import org.owasp.webscarab.domain.SetCookieEvent;
 import org.owasp.webscarab.domain.WebScarabCookieManager;
 import org.owasp.webscarab.domain.WebscarabTag;
+import org.owasp.webscarab.jdbc.JdbcUriDao;
 import org.owasp.webscarab.plugins.proxy.ListenerConfiguration;
 import org.owasp.webscarab.plugins.proxy.Proxy;
 
@@ -66,7 +67,7 @@ import org.springframework.richclient.application.support.ApplicationServicesAcc
 /**
  * @author lpz
  */
-public class Spider extends ApplicationServicesAccessor implements ApplicationContextAware, EventSubscriber  {
+public class Spider extends ApplicationServicesAccessor implements ApplicationContextAware, EventSubscriber {
 
     private Proxy proxy;
     //list of visited uris
@@ -86,10 +87,6 @@ public class Spider extends ApplicationServicesAccessor implements ApplicationCo
     public UriDao getUriDao() {
 
         return uriDao;
-    }
-
-    public void setUriDao(UriDao uriDao) {
-        this.uriDao = uriDao;
     }
 
     public Proxy getProxy() {
@@ -170,10 +167,6 @@ public class Spider extends ApplicationServicesAccessor implements ApplicationCo
         this.applicationContext = applicationContext;
     }
 
-    public void setCookieManager(WebScarabCookieManager cookieManager) {
-        this.webscarabCookieManager = cookieManager;
-    }
-
     public WebScarabCookieManager getCookieManager() {
         return webscarabCookieManager;
     }
@@ -185,13 +178,6 @@ public class Spider extends ApplicationServicesAccessor implements ApplicationCo
             getEventService().subscribeStrongly(SpiderFetchEvent.class, this);
             getEventService().subscribeStrongly(SpiderStartEvent.class, this);
             getEventService().subscribeStrongly(URIFoundEvent.class, this);
-        }
-    }
-
-    public void setConversationService(ConversationService conversationService) {
-        this.conversationService = conversationService;
-        if (conversationService != null) {
-            //eventService.subscribeStrongly(URIFoundEvent.class, uriListener);
         }
     }
 
@@ -259,6 +245,9 @@ public class Spider extends ApplicationServicesAccessor implements ApplicationCo
         if (ese instanceof SessionEvent) {
             SessionEvent event = (SessionEvent) ese;
             spiderConfig = (SpiderConfig) applicationContext.getBean("spiderConfig");
+            webscarabCookieManager = (WebScarabCookieManager) applicationContext.getBean("webscarabCookieManager");
+            uriDao = (JdbcUriDao) applicationContext.getBean("uriDao");
+            conversationService = (ConversationService) applicationContext.getBean("conversationService");
             if (event.getType() == SessionEvent.SESSION_CHANGED) {
                 setSession(event.getSession());
             }
@@ -453,9 +442,9 @@ public class Spider extends ApplicationServicesAccessor implements ApplicationCo
             StatusBar sb = aw.getStatusBar();
             sb.setVisible(true);
             if (i != 0) {
-                sb.setMessage(String.format(Spider.this.getMessage("spider.statusBar.yes.message"),i)); 
+                sb.setMessage(String.format(Spider.this.getMessage("spider.statusBar.yes.message"), i));
             } else {
-                sb.setMessage( Spider.this.getMessage("spider.statusBar.no.message"));
+                sb.setMessage(Spider.this.getMessage("spider.statusBar.no.message"));
             }
         }
 
