@@ -32,7 +32,7 @@ public final class FuzzingVariable extends BaseEntity {
     }
 
     public FuzzingVariable() {
-        variableName = "[new_variable]";
+        variableName = "$(new_variable)";
         sourcePath = "";
     }
 

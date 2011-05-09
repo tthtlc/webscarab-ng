@@ -29,7 +29,7 @@ public class LogHandler extends Handler {
             return;
         if(record.getSourceClassName().toLowerCase().endsWith("labeledobjectsupport"))
             return;
-        synchronized(eventService) {
+        synchronized(this) {
             //passing record further
             eventService.publish(new LogEvent(new WebScarabLogRecord(record), this));
         }

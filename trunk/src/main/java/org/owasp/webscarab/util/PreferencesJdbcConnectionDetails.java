@@ -27,7 +27,7 @@ public class PreferencesJdbcConnectionDetails extends JdbcConnectionDetails {
         if (! tmp.endsWith(slash))
             tmp = tmp + slash;
         super.setUrl(prefs.get(URL, "jdbc:hsqldb:file:" + tmp + "webscarab"));
-        super.setUsername(prefs.get(USERNAME, "owasp_user"));
+        super.setUsername(prefs.get(USERNAME, "sa"));
     }
 
     /* (non-Javadoc)
