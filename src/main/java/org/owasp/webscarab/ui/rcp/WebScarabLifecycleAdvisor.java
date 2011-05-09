@@ -82,7 +82,7 @@ public class WebScarabLifecycleAdvisor extends DefaultApplicationLifecycleAdviso
                 JdbcConnectionDetails jdbc = new JdbcConnectionDetails();
                 jdbc.setDriverClassName("org.hsqldb.jdbcDriver");
                 jdbc.setUrl("jdbc:hsqldb:file:" + WebScarab.args[0]);
-                jdbc.setUsername("owasp_user");
+                jdbc.setUsername("sa");
                 jdbc.setPassword(null);
 
                 try {

@@ -7,7 +7,10 @@ import java.awt.Dimension;
 import org.owasp.webscarab.domain.WebScarabCookieManager;
 
 import org.owasp.webscarab.ui.rcp.forms.CookieManagerForm;
+import org.springframework.beans.BeansException;
 import org.springframework.binding.form.HierarchicalFormModel;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.richclient.command.AbstractCommand;
 import org.springframework.richclient.command.support.ApplicationWindowAwareCommand;
 import org.springframework.richclient.core.Message;
@@ -20,20 +23,17 @@ import org.springframework.richclient.form.FormModelHelper;
  * @author lpz
  *
  */
-public class ShowCookieManagerCommand extends ApplicationWindowAwareCommand {
+public class ShowCookieManagerCommand extends ApplicationWindowAwareCommand implements ApplicationContextAware {
 
     private HierarchicalFormModel formModel;
     private CookieManagerForm cookieManagerForm;
-
+    private ApplicationContext applicationContext;
+    
     public WebScarabCookieManager getCookieManager() {
-        return cookieManager;
+        return (WebScarabCookieManager) applicationContext.getBean("WebScarabCookieManager") ;
     }
 
-    public void setCookieManager(WebScarabCookieManager cookieManager) {
-        this.cookieManager = cookieManager;
-    }
     private CookieManagerDialog dialog;
-    private WebScarabCookieManager cookieManager;
 
     public ShowCookieManagerCommand() {
         super("showCookieManagerCommand");
@@ -44,13 +44,17 @@ public class ShowCookieManagerCommand extends ApplicationWindowAwareCommand {
      */
     @Override
     protected void doExecuteCommand() {
-
+        WebScarabCookieManager cookieManager = getCookieManager();
         formModel = FormModelHelper.createCompoundFormModel(cookieManager);
         cookieManagerForm = new CookieManagerForm(formModel, cookieManager);
         dialog = new CookieManagerDialog();
         dialog.setCallingCommand(this);
         dialog.setPreferredSize(new Dimension(500,400));
         dialog.showDialog();
+    }
+
+    public void setApplicationContext(ApplicationContext ac) throws BeansException {
+        applicationContext = ac;
     }
 
     private class CookieManagerDialog extends TitledPageApplicationDialog {

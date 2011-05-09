@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PushbackInputStream;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.ContentHandler;
 import java.net.ContentHandlerFactory;
 import java.net.HttpURLConnection;
@@ -17,6 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -295,6 +297,35 @@ public class Spider extends ApplicationServicesAccessor implements ApplicationCo
         return eventService;
     }
 
+    public void incrementThreads() throws InterruptedException {
+        synchronized (spiderThreadsMonitor) {
+            if (threadCount > spiderConfig.getMaxThreads()) {
+                spiderThreadsMonitor.wait();
+            }
+            threadCount++;
+            updateStatusBar(threadCount);
+        }
+    }
+
+    public void decrementThreads() {
+        synchronized (spiderThreadsMonitor) {
+            threadCount--;
+            updateStatusBar(threadCount);
+            spiderThreadsMonitor.notify();
+        }
+    }
+
+    public void updateStatusBar(int i) {
+        ApplicationWindow aw = Application.instance().getActiveWindow();
+        StatusBar sb = aw.getStatusBar();
+        sb.setVisible(true);
+        if (i != 0) {
+            sb.setMessage(String.format(Spider.this.getMessage("spider.statusBar.yes.message"), i));
+        } else {
+            sb.setMessage(Spider.this.getMessage("spider.statusBar.no.message"));
+        }
+    }
+
     /**
      * A HTML parser callback used by this class to detect links and forms.
      */
@@ -437,41 +468,6 @@ public class Spider extends ApplicationServicesAccessor implements ApplicationCo
             this.conversationService = conversationService;
         }
 
-        public void updateStatusBar(int i) {
-            ApplicationWindow aw = Application.instance().getActiveWindow();
-            StatusBar sb = aw.getStatusBar();
-            sb.setVisible(true);
-            if (i != 0) {
-                sb.setMessage(String.format(Spider.this.getMessage("spider.statusBar.yes.message"), i));
-            } else {
-                sb.setMessage(Spider.this.getMessage("spider.statusBar.no.message"));
-            }
-        }
-
-        public synchronized void incrementThreads() throws InterruptedException {
-
-            synchronized (spiderThreadsMonitor) {
-                threadCount++;
-                if (threadCount >= spiderConfig.getMaxThreads()) {
-                    spiderThreadsMonitor.wait();
-                }
-                updateStatusBar(threadCount);
-            }
-        }
-
-        public synchronized void decrementThreads() {
-
-            synchronized (spiderThreadsMonitor) {
-                threadCount--;
-                updateStatusBar(threadCount);
-                spiderThreadsMonitor.notify();
-            }
-        }
-
-        public synchronized boolean newThreadAllowed() {
-            return threadCount < spiderConfig.getMaxThreads();
-        }
-
         private void createConvarsation(String method, HttpURLConnection ucon, byte[] content) throws IOException {
             Conversation conv = new Conversation();
             conv.setRequestUri(uri);
@@ -510,7 +506,7 @@ public class Spider extends ApplicationServicesAccessor implements ApplicationCo
         private HttpURLConnection prepareConnection(URL url, String data) throws IOException {
             HttpURLConnection ucon = (HttpURLConnection) (useProxy() ? url.openConnection(getProxyForSpider()) : url.openConnection());
             ucon.setRequestMethod(method.toUpperCase());
-            synchronized (spiderConfig.getHeaderConfigurations()) {
+            synchronized (this) { //TODO: change to lock
                 Iterator<HeaderConfiguration> it = spiderConfig.getHeaderConfigurations().iterator();
                 while (it.hasNext()) {
                     HeaderConfiguration hc = it.next();
@@ -579,7 +575,12 @@ public class Spider extends ApplicationServicesAccessor implements ApplicationCo
                     }
                 }
                 URI[] uris = new URI[1];
-                String q = query.toString();
+                String q = "";
+                try {
+                    q = URLEncoder.encode(query.toString(), "UTF-8"); //TODO: check
+                } catch (UnsupportedEncodingException ex) {
+                    Logger.getLogger(Spider.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 String[] methods = new String[1];
                 String[] parameters = new String[1];
                 parameters[0] = isPost ? q : "";
@@ -632,7 +633,7 @@ public class Spider extends ApplicationServicesAccessor implements ApplicationCo
                 } else {
                     addFetchedUri(uri);
                 }
-                this.incrementThreads();
+                Spider.this.incrementThreads();
 
                 HttpURLConnection ucon = prepareConnection(uri.toURL(), parameters);
                 String contentType = ucon.getContentType();
@@ -668,8 +669,10 @@ public class Spider extends ApplicationServicesAccessor implements ApplicationCo
                 Logger.getLogger(Spider.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
                 Logger.getLogger(Spider.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                Logger.getLogger(Spider.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
-                this.decrementThreads();
+                Spider.this.decrementThreads();
             }
         }
 

@@ -133,6 +133,10 @@ public class ConsoleView extends AbstractView implements EventSubscriber, Action
         JPanel mainPanel = getComponentFactory().createPanel(new BorderLayout());
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         mainPanel.add(filterPanel, BorderLayout.SOUTH);
+
+        //setting handler for all logs in app
+        logHandler = new LogHandler(this.getEventService());
+        Logger.getLogger("").addHandler(logHandler);
         return mainPanel;
     }
 
@@ -171,9 +175,6 @@ public class ConsoleView extends AbstractView implements EventSubscriber, Action
             }
         } else if (ese instanceof SessionEvent) {
             if (logHandler == null) {
-                //setting handler for all logs in app
-                logHandler = new LogHandler(this.getEventService());
-                Logger.getLogger("").addHandler(logHandler);
             }
         }
     }

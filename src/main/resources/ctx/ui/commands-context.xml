@@ -54,7 +54,6 @@
     </bean>
     <bean id="showCookieManagerCommand"
 		class="org.owasp.webscarab.ui.rcp.ShowCookieManagerCommand" singleton="true">
-                <!-- TODO:!<property name="cookieManager" ref="webscarabCookieManager"/>-->
    </bean>
    <bean id="showConsoleToggleCommand"
 		class="org.springframework.richclient.command.support.ShowViewCommand" singleton="true">

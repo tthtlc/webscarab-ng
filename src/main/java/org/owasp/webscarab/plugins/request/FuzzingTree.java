@@ -130,8 +130,10 @@ public class FuzzingTree {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String strLine;
             while ((strLine = br.readLine()) != null) {
-                values.add(strLine);
-                siblings++;
+                if (!values.contains(strLine)) {
+                    values.add(strLine);
+                    siblings++;
+                }
             }
             in.close();
         }
